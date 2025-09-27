@@ -56,9 +56,9 @@ FabricJS 学习笔记
 
 | 类名 | 详细说明 |
 |------|----------|
-| `BaseBrush` | 所有画笔工具的**基类**，定义画笔的核心接口（`onMouseDown`、`onMouseMove`、`onMouseUp`），子类需实现具体绘制逻辑，支持自定义画笔扩展。 |
+| `BaseBrush` | 所有画笔工具的**基类**，定义画笔的核心接口（`onMouseDown`、`onMouseMove`、`onMouseUp`），子类需实现具体绘制逻辑，支持自定义画笔扩展。[Learn More](./docs/Classes/3.1 BaseBrush.md) |
 | `PencilBrush` | 铅笔画笔类，模拟真实铅笔的自由绘制效果，支持连续线条绘制，可调整线宽（`width`）、透明度（`opacity`），线条平滑度可通过参数控制。 |
-| `CircleBrush` | 圆形画笔类，绘制圆形或类圆形笔触（如圆点、圆形喷溅），支持调整笔触大小（`radius`）、密度，可用于绘制点云、装饰性圆形图案。 |
+| `CircleBrush` | 圆形画笔类，绘制圆形或类圆形笔触（如圆点、圆形喷溅），支持调整笔触大小（`radius`）、密度，可用于绘制点云、装饰性圆形图案。[Learn More](./docs/Classes/3.2 CircelBrush.md) |
 | `SprayBrush` | 喷溅画笔类，模拟喷漆/粒子喷绘效果，随机分布点或图案，支持调整喷溅密度（`spray Density`）、点大小，适用于绘制纹理、雾效等。 |
 | `PatternBrush` | 图案画笔类，使用自定义图案（图像、Canvas、SVG）作为笔触，绘制带有图案的线条或区域，支持调整图案缩放（`scaleX`/`scaleY`）、重复方式。 |
 
@@ -68,7 +68,7 @@ FabricJS 学习笔记
 
 | 类名 | 详细说明 |
 |------|----------|
-| `Canvas` | 交互式画布核心类，基于 HTML5 Canvas 元素，提供图形渲染、事件监听（鼠标/触摸）、对象管理（添加/删除/选中），是 Fabric.js 应用的**入口类**。 |
+| `Canvas` | 交互式画布核心类，基于 HTML5 Canvas 元素，提供图形渲染、事件监听（鼠标/触摸）、对象管理（添加/删除/选中），是 Fabric.js 应用的**入口类**。[Learn More](./docs/Classes/2.Canvas.md) |
 | `StaticCanvas` | 静态画布类，与 `Canvas` 功能类似但**不支持交互**（无选中、拖拽），仅用于渲染静态内容（如生成图片、导出 SVG），性能更优。 |
 | `CanvasDOMManager` | 管理 `Canvas` 相关的 DOM 元素（如画布容器、辅助层），处理 DOM 事件绑定、尺寸自适应、样式调整，协调 Canvas 与 DOM 环境的适配。 |
 | `StaticCanvasDOMManager` | 管理 `StaticCanvas` 的 DOM 元素，屏蔽交互相关的 DOM 事件（如鼠标点击），处理静态画布的尺寸调整、样式设置，确保静态渲染的兼容性。 |
