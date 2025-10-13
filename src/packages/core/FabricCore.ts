@@ -1,22 +1,28 @@
 import { Canvas } from 'fabric'
 import type { CanvasOptions } from 'fabric';
-import type { IFabricCore, IPluginTempl, IPluginOption } from './interface'
+import type { IFabricCore, IPluginTempl, IPluginOption, IPluginClass, IPluginClass2 } from './interface'
+import { useDebounceFn, useResizeObserver } from '@vueuse/core';
 
 class FabricCore {
     protected _mountEl: HTMLElement | null = null;
     protected _canvasDom: HTMLCanvasElement | null = null;
     protected canvas: Canvas | null = null;
     protected options: CanvasOptions;
+    // 插件map
     protected plubinMap = new Map<string, [IPluginTempl, IPluginOption | undefined]>()
+    // 插件实例map
+    protected plugins = new Map<string, IPluginClass2>()
     constructor(options?: CanvasOptions) {
         this.options = options || {} as CanvasOptions;
     }
+    // 获取canvas实例
     getCanvas(): Canvas {
         if (!this.canvas) {
             throw new Error('canvas is not mounted')
         }
         return this.canvas
     }
+    // 挂载canvas
     mount(target: HTMLCanvasElement | string) {
         const mountEl: HTMLCanvasElement | null = typeof target === 'string' ? document.querySelector(target) : target;
         if (!mountEl) {
@@ -24,35 +30,47 @@ class FabricCore {
         }
         this._mountEl = mountEl
         const { width, height } = mountEl.getBoundingClientRect()
+        // 创建画布Dom
         this._canvasDom = document.createElement('canvas')
-        this._canvasDom.width = width
-        this._canvasDom.height = height
         mountEl.appendChild(this._canvasDom)
-        console.log('this._canvasDom', this._canvasDom);
+
+        // 安装插件
+        this._installPlugins()
+
         // 画布
         this.canvas = new Canvas(this._canvasDom, {
             ...this.options,
-            selection: true,
             width,
             height,
         })
-        // 安装插件
-        this._install()
 
-        this.canvas.renderAll()
+        // 监听mountEl resize事件
+        const resizeFn = useDebounceFn(([entry]) => {
+            const { width, height } = entry!.contentRect
+            this.canvas!.setDimensions({ width, height })
+        }, 200)
+        useResizeObserver(this._mountEl, resizeFn)
+
         return this;
     }
     // 注册插件
     use(plugin: IPluginTempl, options?: IPluginOption) {
-        const pluginName = plugin.pluginName
+        if (this.canvas) {
+            throw new Error('Please use plugins before mounting')
+        }
+        const { pluginName } = plugin
         if (this.plubinMap.has(pluginName)) {
             throw new Error(`plugin ${pluginName} already used`)
         }
         this.plubinMap.set(pluginName, [plugin, options])
     }
     // 安装插件
-    protected _install() {
+    protected _installPlugins() {
         // mounted后安装插件
+        this.plubinMap.forEach(([plugin, options]) => {
+            const pluginInstance = new (plugin as IPluginClass)(this.canvas!, this, options)
+            this.plugins.set(plugin.pluginName, pluginInstance)
+        })
     }
     // 销毁canvas
     destroy() {

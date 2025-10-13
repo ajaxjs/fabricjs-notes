@@ -32,7 +32,7 @@ export declare interface IPluginOption {
     [propName: string]: unknown | undefined;
 }
 
-declare class IPluginClass2 extends IPluginTempl {
+export declare class IPluginClass2 extends IPluginTempl {
     constructor();
 }
 // 插件class

@@ -5,13 +5,14 @@ import { Rect, Circle } from 'fabric'
 
 const app = new FabricCore();
 const editorRef = ref();
+
 onMounted(() => {
-    console.log(editorRef.value);
+    
     
     app.mount(editorRef.value)
     const canvas = app.getCanvas()
     canvas.backgroundColor = '#f0f0f0'
-    canvas.renderAll()
+    //canvas.renderAll()
 
     console.log(canvas, '----+++');
 
@@ -53,7 +54,7 @@ onUnmounted(async () => {
 
 <style lang="scss" scoped>
 #editor {
-    width: 600px;
+    width: 100%;
     height: 400px;
 }
 </style>

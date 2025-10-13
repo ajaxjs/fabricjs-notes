@@ -14,10 +14,12 @@ function destroyEditor() {
 </script>
 
 <template>
-	<div class="p-4">
-		<Button>Click me</Button>
-		<Button @click="destroyEditor">Destroy</Button>
-		<Editor ref="editorRef" class="border border-gray-200" />
+	<div class="w-screen h-screen border-gray-200 flex flex-col overflow-hidden">
+		<div class="p-1 flex">
+			<Button>Click me</Button>
+			<Button @click="destroyEditor">Destroy</Button>
+		</div>
+		<Editor ref="editorRef" class="flex-1" />
 	</div>
 </template>
 
