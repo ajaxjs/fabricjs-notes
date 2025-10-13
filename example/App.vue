@@ -11,12 +11,23 @@ function destroyEditor() {
 		editorRef.value.editor.destroy()
 	}
 }
+function setZoom(z) {
+	const { editor } = editorRef.value
+	const canvas = editor.getCanvas()
+	const zoom = canvas.getZoom()
+	console.log(zoom);
+	canvas.setZoom( zoom + z )
+	canvas.renderAll()
+
+}
 </script>
 
 <template>
 	<div class="w-screen h-screen border-gray-200 flex flex-col overflow-hidden">
-		<div class="p-1 flex">
+		<div class="p-1 flex gap-1">
 			<Button>Click me</Button>
+			<Button @click="setZoom(0.2)">Zoom+</Button>
+			<Button @click="setZoom(-0.2)">Zoom-</Button>
 			<Button @click="destroyEditor">Destroy</Button>
 		</div>
 		<Editor ref="editorRef" class="flex-1" />

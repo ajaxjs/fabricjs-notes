@@ -2,6 +2,7 @@ import { Canvas } from 'fabric'
 import type { CanvasOptions } from 'fabric';
 import type { IFabricCore, IPluginTempl, IPluginOption, IPluginClass, IPluginClass2 } from './interface'
 import { useDebounceFn, useResizeObserver } from '@vueuse/core';
+import FabricRuler from './built-In/fabricRuler';
 
 class FabricCore {
     protected _mountEl: HTMLElement | null = null;
@@ -43,6 +44,7 @@ class FabricCore {
             width,
             height,
         })
+        new FabricRuler(this.canvas);
 
         // 监听mountEl resize事件
         const resizeFn = useDebounceFn(([entry]) => {
