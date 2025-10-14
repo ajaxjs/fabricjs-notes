@@ -7,15 +7,13 @@ const app = new FabricCore();
 const editorRef = ref();
 
 onMounted(() => {
-    
-    
+
+
     app.mount(editorRef.value)
     const canvas = app.getCanvas()
     canvas.backgroundColor = '#f0f0f0'
     //canvas.renderAll()
-
-    console.log(canvas, '----+++');
-
+    /*
     const circle = new Circle({
         radius: 50,
         fill: '#666',
@@ -31,7 +29,7 @@ onMounted(() => {
         top: 100,
     })
     canvas.add(rect)
-    canvas.renderAll()
+    canvas.renderAll()*/
 })
 
 defineExpose({
@@ -39,13 +37,7 @@ defineExpose({
 })
 
 // 组件卸载时销毁canvas
-onUnmounted(async () => {
-    console.log('unmounted-');
-    if (editorRef.value) {
-        app.destroy()
-        await app.getCanvas().dispose()
-    }
-})
+onUnmounted(() => app.destroy())
 </script>
 
 <template>

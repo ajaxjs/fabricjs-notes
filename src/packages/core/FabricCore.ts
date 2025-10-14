@@ -5,6 +5,7 @@ import { useDebounceFn, useResizeObserver } from '@vueuse/core';
 import { FabricRuler } from './built-In/fabricRuler';
 import { FabricGuide } from './built-In/fabricGuide';
 import { FabricCanvas } from './built-In/fabricCanvas';
+//import { initAligningGuidelines } from './built-In/Guideline';
 
 
 
@@ -50,6 +51,7 @@ class FabricCore {
         })
         new FabricRuler(this.canvas);
         new FabricGuide(this.canvas);
+        //initAligningGuidelines(this.canvas)
 
         // 监听mountEl resize事件
         const resizeFn = useDebounceFn(([entry]) => {
