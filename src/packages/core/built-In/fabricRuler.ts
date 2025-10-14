@@ -1,288 +1,605 @@
-// Lightweight, dependency-free FabricRuler
-// Usage: import FabricRuler from '@/app/fabricRuler1'; new FabricRuler(canvas)
+import { Disposable } from '../utils/lifecycle'
+import { DesignUnitMode } from '../configs/background'
+//import { PiBy180 } from '@/utils/common'
+import { Point, Rect as fabricRect, FabricObject } from 'fabric'
+import type { TAxis, TPointerEventInfo, TPointerEvent } from 'fabric'
+import type { FabricCanvas } from './fabricCanvas'
+import { px2mm } from '../utils/image'
+import { ElementNames } from '../types/elements'
+//import { FabricCanvas } from './fabricCanvas'
+import { ReferenceLine } from '../extension/object/ReferenceLine'
+import { WorkSpaceDrawType } from '../configs/canvas'
 
-// rely on global `fabric` (the project already brings fabric into scope)
-// Helper constants / functions moved outside class so this file has no external runtime dependencies.
-// PiBy180, isMobile, px2mm
-// - PiBy180, isMobile: originally from '@/utils/common' in the project (approximation here)
-// - px2mm: originally from '@/utils/image' in the project (approximation here)
+type Rect = { left: number; top: number; width: number; height: number }
 
-const PiBy180 = Math.PI / 180; // from '@/utils/common'
-const isMobile = () => typeof navigator !== 'undefined' && /Mobi|Android/i.test(navigator.userAgent); // simplified
-const px2mm = (px: number, dpi = 96) => (px / dpi) * 25.4; // from '@/utils/image' concept - convert px to mm using DPI
+const PiBy180 = Math.PI / 180
 
-type Rect = { left: number; top: number; width: number; height: number };
-export type HighlightRect = { skip?: 'x' | 'y' } & Rect;
+/**
+ * 配置
+ */
+export interface RulerOptions {
+  /**
+   * 标尺宽高
+   * @default 10
+   */
+  ruleSize?: number
 
-interface RulerOptions {
-  ruleSize?: number;
-  fontSize?: number;
-  enabled?: boolean;
-  backgroundColor?: string;
-  textColor?: string;
-  borderColor?: string;
-  highlightColor?: string;
-  unitName?: string;
+  /**
+   * 字体大小
+   * @default 10
+   */
+  fontSize?: number
+
+  /**
+   * 是否开启标尺
+   * @default false
+   */
+  enabled?: boolean
+
+  /**
+   * 背景颜色
+   */
+  backgroundColor?: string
+
+  /**
+   * 文字颜色
+   */
+  textColor?: string
+
+  /**
+   * 边框颜色
+   */
+  borderColor?: string
+
+  /**
+   * 高亮颜色
+   */
+  highlightColor?: string
+  /**
+   * 高亮颜色
+   */
+  unitName: string
+
 }
 
-export default class FabricRuler {
-  private canvas: any;
-  public options: Required<RulerOptions>;
-  private lastCursor = 'default';
-  private tempRefLine: any = null;
-  private objectRect: { x: HighlightRect[]; y: HighlightRect[] } | undefined;
-  private events: Record<string, any>;
+export type HighlightRect = { skip?: TAxis } & Rect
 
-  constructor(canvas: any, opts?: RulerOptions) {
-    this.canvas = canvas;
-    this.lastCursor = this.canvas.defaultCursor || 'default';
+export class FabricRuler extends Disposable {
+  private canvasEvents
+  public lastCursor: string
+  public workSpaceDraw?: fabricRect
+  public options: Required<RulerOptions>
+  public tempReferenceLine?: ReferenceLine
+  private activeOn = "up"
+  private objectRect: undefined | {
+    x: HighlightRect[],
+    y: HighlightRect[]
+  }
+  private unitMode: number
+  private isDark: boolean
+  private canvas: FabricCanvas
 
-    this.options = Object.assign(
-      {
-        ruleSize: 20,
-        fontSize: 8,
-        enabled: isMobile() ? false : true,
-        backgroundColor: '#fff',
-        borderColor: '#ccc',
-        highlightColor: '#165dff3b',
-        textColor: '#444',
-        unitName: opts?.unitName || 'px',
-      },
-      opts || {}
-    );
+  constructor(canvas: FabricCanvas, options?: Partial<RulerOptions>) {
+    super()
+    this.canvas = canvas
+    this.lastCursor = canvas.defaultCursor
+    this.unitMode = 0 // 默认单位模式
+    this.isDark = false // 默认非深色模式
 
-    this.events = {
+    // 合并默认配置
+    this.options = Object.assign({
+      ruleSize: 20,
+      fontSize: 8,
+      enabled: true,
+      backgroundColor: '#fff',
+      borderColor: '#ccc',
+      highlightColor: '#165dff3b',
+      textColor: '#444',
+      unitName: 'px',
+    }, options)
+
+    // 设置初始配置
+    this.updateTheme(this.isDark)
+
+    this.canvasEvents = {
       'after:render': this.render.bind(this),
-      'mouse:move': this.onMouseMove.bind(this),
-      'mouse:down': this.onMouseDown.bind(this),
-      'mouse:up': this.onMouseUp.bind(this),
-    };
-
-    // attach
-    this.enabled = this.options.enabled;
-
-    // expose reference for convenience
-    (this.canvas as any).ruler = this;
-  }
-
-  get enabled() {
-    return this.options.enabled;
-  }
-  set enabled(v: boolean) {
-    this.options.enabled = v;
-    if (v) {
-      this.canvas.on(this.events);
-      this.render({ ctx: this.canvas.contextContainer });
-    } else {
-      this.canvas.off(this.events);
-      this.canvas.requestRenderAll();
+      'mouse:move': this.mouseMove.bind(this),
+      'mouse:down': this.mouseDown.bind(this),
+      'mouse:up': this.mouseUp.bind(this),
+      'referenceline:moving': this.referenceLineMoving.bind(this),
+      'referenceline:mouseup': this.referenceLineMouseup.bind(this),
     }
+    this.enabled = this.options.enabled
+    //canvas.ruler = this as any
   }
 
-  private getPointHover(pt?: { x: number; y: number } | null) {
-    if (!pt) return '';
-    const { ruleSize } = this.options;
-    if (pt.x <= ruleSize) return 'vertical';
-    if (pt.y <= ruleSize) return 'horizontal';
+  /**
+   * 更新主题配置
+   */
+  public updateTheme(isDark: boolean): void {
+    this.isDark = isDark
+    const unitName = DesignUnitMode.filter(ele => ele.id === this.unitMode)[0]?.name || 'px'
+
+    this.options = {
+      ...this.options,
+      ...(isDark
+        ? {
+          backgroundColor: '#242424',
+          borderColor: '#555',
+          highlightColor: '#165dff3b',
+          textColor: '#ddd',
+          unitName: unitName,
+        }
+        : {
+          backgroundColor: '#fff',
+          borderColor: '#ccc',
+          highlightColor: '#165dff3b',
+          textColor: '#444',
+          unitName: unitName,
+        }),
+    }
+
+    this.render({ ctx: this.canvas.contextContainer })
+  }
+
+  /**
+   * 设置单位模式
+   */
+  public setUnitMode(mode: number): void {
+    this.unitMode = mode
+    const unitName = DesignUnitMode.filter(ele => ele.id === this.unitMode)[0]?.name || 'px'
+    this.options.unitName = unitName
+    this.render({ ctx: this.canvas.contextContainer })
+  }
+
+  public getPointHover(point: Point): 'vertical' | 'horizontal' | '' {
+    if (
+      new fabricRect({
+        left: 0,
+        top: 0,
+        width: this.options.ruleSize,
+        height: this.canvas.height,
+        absolutePositioned: true,
+      }).containsPoint(point)
+    ) {
+      return 'vertical';
+    } else if (
+      new fabricRect({
+        left: 0,
+        top: 0,
+        width: this.canvas.width,
+        height: this.options.ruleSize,
+        absolutePositioned: true,
+      }).containsPoint(point)
+    ) {
+      return 'horizontal';
+    }
     return '';
   }
 
-  private onMouseMove(e: any) {
-    const vp = e && e.viewportPoint;
-    if (!vp) return;
-    if (this.tempRefLine && e.scenePoint) {
-      const axis = (this.tempRefLine as any).axis || ((this.tempRefLine as any).top !== undefined ? 'horizontal' : 'vertical');
-      if (axis === 'horizontal') (this.tempRefLine as any).top = e.scenePoint.y;
-      else (this.tempRefLine as any).left = e.scenePoint.x;
+  private mouseMove(e: TPointerEventInfo<TPointerEvent>) {
+    if (!e.viewportPoint) return
+    if (this.tempReferenceLine && e.scenePoint) {
+      const pos: Partial<ReferenceLine> = {};
+      if (this.tempReferenceLine.axis === 'horizontal') {
+        pos.top = e.scenePoint.y;
+      }
+      else {
+        pos.left = e.scenePoint.x;
+      }
+      this.tempReferenceLine.set({ ...pos, visible: true });
       this.canvas.renderAll();
-      const evt = { e: e.e, pointer: e.scenePoint, target: this.tempRefLine };
-      this.canvas.fire('object:moving', evt);
-      (this.tempRefLine as any).fire && (this.tempRefLine as any).fire('moving', evt);
+      const event = this.getCommonEventInfo(e) as any;
+      this.canvas.fire('object:moving', event);
+      this.tempReferenceLine.fire('moving', event);
     }
-
-    const hover = this.getPointHover(vp);
-    this.canvas.defaultCursor = this.lastCursor;
-    if (!hover) return;
-    this.lastCursor = this.canvas.defaultCursor;
-    this.canvas.defaultCursor = hover === 'horizontal' ? 'ns-resize' : 'ew-resize';
+    const status = this.getPointHover(e.viewportPoint)
+    this.canvas.defaultCursor = this.lastCursor
+    if (!status) return
+    this.lastCursor = this.canvas.defaultCursor
+    this.canvas.defaultCursor = status === 'horizontal' ? 'ns-resize' : 'ew-resize';
   }
 
-  private onMouseDown(e: any) {
-    const vp = e && e.viewportPoint;
-    const hover = this.getPointHover(vp);
-    if (!hover) return;
-    // create simple reference line
-    this.canvas.selection = false;
-    const point = hover === 'horizontal' ? e.viewportPoint.y : e.viewportPoint.x;
-  const line = new (this.canvas.fabric && this.canvas.fabric.Rect ? this.canvas.fabric.Rect : (window as any).fabric && (window as any).fabric.Rect ? (window as any).fabric.Rect : (this.canvas.Rect ? this.canvas.Rect : (window as any).fabric && (window as any).fabric.Rect))({
-      left: hover === 'horizontal' ? 0 : point,
-      top: hover === 'horizontal' ? point : 0,
-      width: hover === 'horizontal' ? this.canvas.getWidth() || this.canvas.width : 1,
-      height: hover === 'horizontal' ? 1 : this.canvas.getHeight() || this.canvas.height,
-      fill: 'pink',
-      originX: 'left',
-      originY: 'top',
-      selectable: false,
-      hasControls: false,
-      hasBorders: false,
-    });
-    (line as any).axis = hover === 'horizontal' ? 'horizontal' : 'vertical';
-    this.tempRefLine = line;
-    this.canvas.add(line);
-    this.canvas.setActiveObject(line);
-    // emulate fabric internal transform start when possible
-    if (this.canvas._setupCurrentTransform) {
-      try {
-        this.canvas._setupCurrentTransform(e.e, line, true);
-      } catch {}
+  private mouseDown(e: TPointerEventInfo<TPointerEvent>) {
+    const pointHover = this.getPointHover(e.viewportPoint)
+    if (!pointHover) return
+    if (this.activeOn === 'up') {
+      this.canvas.selection = false
+      this.activeOn = 'down'
+      const point = pointHover === 'horizontal' ? e.viewportPoint.y : e.viewportPoint.x
+      this.tempReferenceLine = new ReferenceLine(
+        point,
+        {
+          axis: pointHover,
+          visible: false,
+          name: 'ReferenceLine',
+          hasControls: false,
+          hasBorders: false,
+          stroke: 'pink',
+          fill: 'pink',
+          originX: 'center',
+          originY: 'center',
+          padding: 4,
+          globalCompositeOperation: 'difference',
+        }
+      );
+      this.canvas.add(this.tempReferenceLine)
+
+      // 不使用 Pinia store，直接在画布上添加参考线
+      this.canvas.setActiveObject(this.tempReferenceLine)
+      this.canvas._setupCurrentTransform(e.e, this.tempReferenceLine, true)
+      this.tempReferenceLine.fire('down', this.getCommonEventInfo(e));
     }
   }
 
-  private onMouseUp(e: any) {
-    if (!this.tempRefLine) return;
-    this.canvas.selection = true;
-    (this.tempRefLine as any).selectable = false;
-    this.canvas.renderAll();
-    (this.tempRefLine as any).fire && (this.tempRefLine as any).fire('up', { e: e.e, pointer: e && e.scenePoint });
-    this.tempRefLine = null;
+  private getCommonEventInfo(e: TPointerEventInfo<TPointerEvent>) {
+    if (!this.tempReferenceLine || !e.scenePoint) return;
+    return {
+      e: e.e,
+      transform: this.tempReferenceLine.get('transform'),
+      pointer: {
+        x: e.scenePoint.x,
+        y: e.scenePoint.y,
+      },
+      target: this.tempReferenceLine,
+    };
+  }
+
+  private mouseUp(e: TPointerEventInfo<TPointerEvent>) {
+    if (this.activeOn !== 'down') return;
+    this.canvas.selection = true
+    this.tempReferenceLine!.selectable = false
+    this.canvas.renderAll()
+    this.activeOn = 'up';
+    // @ts-ignore
+    this.tempReferenceLine?.fire('up', this.getCommonEventInfo(e));
+    this.tempReferenceLine = undefined;
+  }
+
+  public setWorkSpaceDraw() {
+    this.workSpaceDraw = this.canvas.getObjects().filter((item: any) => item.id === WorkSpaceDrawType)[0] as fabricRect
+  }
+  // 待删
+  public isRectOut(object: FabricObject, target: ReferenceLine): boolean {
+    console.log(object, target);
+    return false;
+  }
+
+  referenceLineMoving(e: any) {
+    if (!this.workSpaceDraw) {
+      this.setWorkSpaceDraw();
+      return;
+    }
+    const { target } = e;
+    target.moveCursor = 'not-allowed';
+    /*if (this.isRectOut(this.workSpaceDraw, target)) {
+      target.moveCursor = 'not-allowed';
+      }*/
+  }
+
+  referenceLineMouseup(e: any) {
+    if (!this.workSpaceDraw) {
+      this.setWorkSpaceDraw();
+      return;
+    }
+    const { target } = e;
+    if (this.isRectOut(this.workSpaceDraw, target)) {
+      this.canvas.remove(target);
+      this.canvas.setCursor(this.canvas.defaultCursor ?? '');
+    }
+  }
+
+  public get enabled() {
+    return this.options.enabled
+  }
+
+  public set enabled(value) {
+    this.options.enabled = value
+    if (value) {
+      this.canvas.on(this.canvasEvents)
+      this.render({ ctx: this.canvas.contextContainer })
+    }
+    else {
+      this.canvas.off(this.canvasEvents)
+      this.canvas.requestRenderAll()
+    }
+  }
+
+  /**
+   * 获取画板尺寸
+   */
+  private getSize() {
+    return {
+      width: this.canvas.width,
+      height: this.canvas.height,
+    }
   }
 
   private render({ ctx }: { ctx: CanvasRenderingContext2D }) {
-    if (!this.options.enabled) return;
-    if (ctx !== this.canvas.contextContainer) return;
+    if (ctx !== this.canvas.contextContainer) return
 
-    const vpt = this.canvas.viewportTransform || [1,0,0,1,0,0];
-    this.calcObjectRect();
+    const { viewportTransform: vpt } = this.canvas
 
-    const size = { width: this.canvas.getWidth ? this.canvas.getWidth() : this.canvas.width, height: this.canvas.getHeight ? this.canvas.getHeight() : this.canvas.height };
+    // 计算元素矩形
+    this.calcObjectRect()
 
-    this.drawRuler(ctx, true, size.width, -(vpt[4] / vpt[0]));
-    this.drawRuler(ctx, false, size.height, -(vpt[5] / vpt[3]));
+    // 绘制尺子
+    this.draw({
+      ctx,
+      isHorizontal: true,
+      rulerLength: this.getSize().width,
+      startCalibration: -(vpt[4] / vpt[0]),
+    })
+    this.draw({
+      ctx,
+      isHorizontal: false,
+      rulerLength: this.getSize().height,
+      startCalibration: -(vpt[5] / vpt[3]),
+    })
 
-    const { borderColor, backgroundColor, ruleSize, textColor } = this.options;
-    this.drawRect(ctx, { left: 0, top: 0, width: ruleSize, height: ruleSize, fill: backgroundColor, stroke: borderColor });
-    this.drawText(ctx, { text: this.options.unitName, left: ruleSize / 2, top: ruleSize / 2, align: 'center', baseline: 'middle', fill: textColor });
+    const { borderColor, backgroundColor, ruleSize, textColor } = this.options
+
+    this.darwRect(ctx, {
+      left: 0,
+      top: 0,
+      width: ruleSize,
+      height: ruleSize,
+      fill: backgroundColor,
+      stroke: borderColor,
+    })
+
+    this.darwText(ctx, {
+      text: this.options.unitName,
+      left: ruleSize / 2,
+      top: ruleSize / 2,
+      align: 'center',
+      baseline: 'middle',
+      fill: textColor,
+    })
   }
 
-  private drawRuler(ctx: CanvasRenderingContext2D, isHorizontal: boolean, rulerLength: number, startCalibration: number) {
-    const zoom = (this.canvas.getZoom && this.canvas.getZoom()) || 1;
-    const gap = this.getGap(zoom);
-    const unitLength = Math.ceil(rulerLength / zoom);
-    const startValue = Math.floor(startCalibration / gap) * gap;
-    const startOffset = startValue - startCalibration;
+  private draw(opt: { ctx: CanvasRenderingContext2D, isHorizontal: boolean, rulerLength: number, startCalibration: number }) {
+    const { ctx, isHorizontal, rulerLength, startCalibration } = opt
+    const zoom = this.canvas.getZoom()
 
-    const canvasSize = { width: this.canvas.width, height: this.canvas.height };
-    const { textColor, borderColor, ruleSize, highlightColor } = this.options;
-    const padding = 2.5;
+    const gap = this.getGap(zoom)
+    const unitLength = Math.ceil(rulerLength / zoom)
+    const startValue = Math.floor(startCalibration / gap) * gap
+    const startOffset = startValue - startCalibration
 
-    this.drawRect(ctx, { left: 0, top: 0, width: isHorizontal ? canvasSize.width : ruleSize, height: isHorizontal ? ruleSize : canvasSize.height, fill: this.options.backgroundColor, stroke: this.options.borderColor });
+    const canvasSize = this.getSize()
 
+    const { textColor, borderColor, ruleSize, highlightColor } = this.options
+
+    // 文字顶部偏移
+    const padding = 2.5
+
+    // 背景
+    this.darwRect(ctx, {
+      left: 0,
+      top: 0,
+      width: isHorizontal ? canvasSize.width : ruleSize,
+      height: isHorizontal ? ruleSize : canvasSize.height,
+      fill: this.options.backgroundColor,
+      stroke: this.options.borderColor,
+    })
+
+    // 标尺刻度线显示
     for (let pos = 0; pos + startOffset <= unitLength; pos += gap) {
       for (let index = 0; index < 10; index++) {
-        const position = Math.round((startOffset + pos + (gap * index) / 10) * zoom);
-        const isMajorLine = index === 0;
-        const [left, top] = isHorizontal ? [position, isMajorLine ? 0 : ruleSize - 8] : [isMajorLine ? 0 : ruleSize - 8, position];
-        const [width, height] = isHorizontal ? [0, ruleSize - top] : [ruleSize - left, 0];
-        this.drawLine(ctx, { left, top, width, height, stroke: borderColor });
+        const position = Math.round((startOffset + pos + (gap * index) / 10) * zoom)
+        const isMajorLine = index === 0
+        const [left, top] = isHorizontal ? [position, isMajorLine ? 0 : ruleSize - 8] : [isMajorLine ? 0 : ruleSize - 8, position]
+        const [width, height] = isHorizontal ? [0, ruleSize - top] : [ruleSize - left, 0]
+        this.darwLine(ctx, {
+          left,
+          top,
+          width,
+          height,
+          stroke: borderColor,
+        })
       }
     }
 
+    // 标尺蓝色遮罩
     if (this.objectRect) {
-      const axis = isHorizontal ? 'x' : 'y';
+      const axis = isHorizontal ? 'x' : 'y'
       this.objectRect[axis].forEach((rect) => {
-        if (rect.skip === axis) return;
-        const left = isHorizontal ? (rect.left - startCalibration) * zoom : 0;
-        const top = isHorizontal ? 0 : (rect.top - startCalibration) * zoom;
-        const width = isHorizontal ? rect.width * zoom : ruleSize;
-        const height = isHorizontal ? ruleSize : rect.height * zoom;
-        this.drawRect(ctx, { left, top, width, height, fill: highlightColor });
-      });
+        // 跳过指定矩形
+        if (rect.skip === axis) return
+
+        const [left, top, width, height] = isHorizontal ? [(rect.left - startCalibration) * zoom, 0, rect.width * zoom, ruleSize] : [0, (rect.top - startCalibration) * zoom, ruleSize, rect.height * zoom]
+
+        // 高亮遮罩
+        this.darwRect(ctx, {
+          left,
+          top,
+          width,
+          height,
+          fill: highlightColor,
+        })
+      })
     }
 
+    // 标尺文字显示
     for (let pos = 0; pos + startOffset <= unitLength; pos += gap) {
-      const position = (startOffset + pos) * zoom;
-      let textValue = (startValue + pos).toString();
-      const [left, top, angle] = isHorizontal ? [position + 6, padding, 0] : [padding, position - 6, -90];
-      this.drawText(ctx, { text: textValue, left, top, fill: textColor, angle });
+      const position = (startOffset + pos) * zoom
+      let textValue = (startValue + pos).toString()
+      if (this.options.unitName === 'mm') {
+        textValue = px2mm(startValue + pos).toFixed(0)
+      }
+      const [left, top, angle] = isHorizontal ? [position + 6, padding, 0] : [padding, position - 6, -90]
+
+      this.darwText(ctx, {
+        text: textValue,
+        left,
+        top,
+        fill: textColor,
+        angle,
+      })
     }
+    // draw end
   }
 
   private getGap(zoom: number) {
-    const zooms = [0.02, 0.03, 0.05, 0.1, 0.2, 0.5, 1, 2, 5];
-    const gaps = [5000, 2500, 1000, 500, 200, 100, 50, 20, 10];
-    let i = 0;
-    while (i < zooms.length && zooms[i]! < zoom) i++;
-    return gaps[i - 1] || 10000;
-  }
+    const zooms = [0.02, 0.03, 0.05, 0.1, 0.2, 0.5, 1, 2, 5]
+    const gaps = [5000, 2500, 1000, 500, 200, 100, 50, 20, 10]
 
-  private drawRect(ctx: CanvasRenderingContext2D, r: { left: number; top: number; width: number; height: number; fill?: any; stroke?: string; strokeWidth?: number }){
-    ctx.save();
-    ctx.beginPath();
-    if (r.fill) ctx.fillStyle = r.fill;
-    ctx.rect(r.left, r.top, r.width, r.height);
-    ctx.fill();
-    if (r.stroke) { ctx.strokeStyle = r.stroke; ctx.lineWidth = r.strokeWidth || 1; ctx.stroke(); }
-    ctx.restore();
-  }
-
-  private drawText(ctx: CanvasRenderingContext2D, opt: { left: number; top: number; text: string; fill?: any; align?: CanvasTextAlign; baseline?: CanvasTextBaseline; angle?: number; fontSize?: number }){
-    ctx.save();
-    if (opt.fill) ctx.fillStyle = opt.fill;
-    ctx.textAlign = opt.align || 'left';
-    ctx.textBaseline = opt.baseline || 'top';
-    ctx.font = `${opt.fontSize || this.options.fontSize}px Helvetica`;
-    if (opt.angle) {
-      ctx.translate(opt.left, opt.top);
-      ctx.rotate(PiBy180 * opt.angle);
-      ctx.translate(-opt.left, -opt.top);
+    let i = 0
+    while (i < zooms.length && zooms[i]! < zoom) {
+      i++
     }
-    ctx.fillText(opt.text, opt.left, opt.top);
-    ctx.restore();
+
+    return gaps[i - 1] || 10000
   }
 
-  private drawLine(ctx: CanvasRenderingContext2D, opt: { left: number; top: number; width: number; height: number; stroke?: any; lineWidth?: number }){
-    ctx.save();
-    ctx.beginPath();
-    if (opt.stroke) ctx.strokeStyle = opt.stroke;
-    ctx.lineWidth = opt.lineWidth || 1;
-    ctx.moveTo(opt.left, opt.top);
-    ctx.lineTo(opt.left + opt.width, opt.top + opt.height);
-    ctx.stroke();
-    ctx.restore();
+  private darwRect(
+    ctx: CanvasRenderingContext2D,
+    {
+      left,
+      top,
+      width,
+      height,
+      fill,
+      stroke,
+      strokeWidth,
+    }: {
+      left: number
+      top: number
+      width: number
+      height: number
+      fill?: string | CanvasGradient | CanvasPattern
+      stroke?: string
+      strokeWidth?: number
+    },
+  ) {
+    ctx.save()
+    ctx.beginPath()
+    fill && (ctx.fillStyle = fill)
+    ctx.rect(left, top, width, height)
+    ctx.fill()
+    if (stroke) {
+      ctx.strokeStyle = stroke
+      ctx.lineWidth = strokeWidth ?? 1
+      ctx.stroke()
+    }
+    ctx.restore()
+  }
+
+  private darwText(
+    ctx: CanvasRenderingContext2D,
+    {
+      left,
+      top,
+      text,
+      fill,
+      align,
+      angle,
+      fontSize,
+      baseline,
+    }: {
+      left: number
+      top: number
+      text: string
+      fill?: string | CanvasGradient | CanvasPattern
+      align?: CanvasTextAlign
+      baseline?: CanvasTextBaseline
+      angle?: number
+      fontSize?: number
+    },
+  ) {
+    ctx.save()
+    fill && (ctx.fillStyle = fill)
+    ctx.textAlign = align ?? 'left'
+    ctx.textBaseline = baseline ?? 'top'
+    ctx.font = `${fontSize ?? 12}px Helvetica`
+    if (angle) {
+      ctx.translate(left, top)
+      ctx.rotate(PiBy180 * angle)
+      ctx.translate(-left, -top)
+    }
+    ctx.fillText(text, left, top)
+    ctx.restore()
+  }
+
+  private darwLine(
+    ctx: CanvasRenderingContext2D,
+    {
+      left,
+      top,
+      width,
+      height,
+      stroke,
+      lineWidth,
+    }: {
+      left: number
+      top: number
+      width: number
+      height: number
+      stroke?: string | CanvasGradient | CanvasPattern
+      lineWidth?: number
+    },
+  ) {
+    ctx.save()
+    ctx.beginPath()
+    stroke && (ctx.strokeStyle = stroke)
+    ctx.lineWidth = lineWidth ?? 1
+    ctx.moveTo(left, top)
+    ctx.lineTo(left + width, top + height)
+    ctx.stroke()
+    ctx.restore()
   }
 
   private calcObjectRect() {
-    const active = this.canvas.getActiveObjects ? this.canvas.getActiveObjects() : (this.canvas.getActiveObject ? [this.canvas.getActiveObject()] : []);
-    if (!active || active.length === 0) { this.objectRect = undefined; return; }
-    // skip reference-line like objects
-    if (active[0] && ((active[0] as any).type || '').toLowerCase() === 'referenceline') { this.objectRect = undefined; return; }
-    const rects: HighlightRect[] = active.map((o: any) => o.getBoundingRect ? o.getBoundingRect(true, true) : ({ left: o.left || 0, top: o.top || 0, width: o.width || 0, height: o.height || 0 }));
-    if (rects.length === 0) return;
-    this.objectRect = { x: this.mergeLines(rects, true), y: this.mergeLines(rects, false) };
+    const activeObjects = this.canvas.getActiveObjects()
+    if (activeObjects.length === 0) {
+      this.objectRect = undefined
+      return
+    }
+    const activeObj = activeObjects[0] as any;
+    if (activeObj?.name?.toLowerCase() === ElementNames.REFERENCELINE) {
+      this.objectRect = undefined
+      return
+    }
+    const allRect = activeObjects.reduce((rects, obj) => {
+      const rect: HighlightRect = obj.getBoundingRect()
+      rects.push(rect)
+      return rects
+    }, [] as HighlightRect[])
+    if (allRect.length === 0) return
+    this.objectRect = {
+      x: this.mergeLines(allRect, true),
+      y: this.mergeLines(allRect, false),
+    }
   }
 
   private mergeLines(rect: Rect[], isHorizontal: boolean) {
-    const axis = isHorizontal ? 'left' : 'top';
-    const length = isHorizontal ? 'width' : 'height';
-    rect.sort((a, b) => a[axis] - b[axis]);
-    const merged: Rect[] = [];
-    let cur = Object.assign({}, rect[0]);
+    const axis = isHorizontal ? 'left' : 'top'
+    const length = isHorizontal ? 'width' : 'height'
+    // 先按照 axis 的大小排序
+    rect.sort((a, b) => a[axis] - b[axis])
+    const mergedLines = []
+    let currentLine = Object.assign({}, rect[0])
     for (let i = 1; i < rect.length; i++) {
-      const line = Object.assign({}, rect[i]);
-      if ((cur as any)[axis] + (cur as any)[length] >= (line as any)[axis]) {
-        (cur as any)[length] = Math.max((cur as any)[axis] + (cur as any)[length], (line as any)[axis] + (line as any)[length]) - (cur as any)[axis];
+      const line = Object.assign({}, rect[i])
+      if (currentLine[axis] + currentLine[length] >= line[axis]) {
+        // 当前线段和下一个线段相交，合并宽度
+        currentLine[length] =
+          Math.max(currentLine[axis] + currentLine[length], line[axis] + line[length]) -
+          currentLine[axis]
       } else {
-        merged.push(cur);
-        cur = Object.assign({}, line);
+        // 当前线段和下一个线段不相交，将当前线段加入结果数组中，并更新当前线段为下一个线段
+        mergedLines.push(currentLine)
+        currentLine = Object.assign({}, line)
       }
     }
-    merged.push(cur);
-    return merged;
+    // 加入数组
+    mergedLines.push(currentLine)
+    return mergedLines
   }
 
-  public dispose() {
-    this.enabled = false;
-    this.tempRefLine = null;
-    try { delete (this.canvas as any).ruler; } catch {}
+  public dispose(): void {
+    super.dispose()
+    this.enabled = false
   }
 }

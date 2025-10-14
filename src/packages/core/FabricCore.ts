@@ -1,13 +1,17 @@
-import { Canvas } from 'fabric'
+//import { Canvas } from 'fabric'
 import type { CanvasOptions } from 'fabric';
-import type { IFabricCore, IPluginTempl, IPluginOption, IPluginClass, IPluginClass2 } from './interface'
+import type { IPluginTempl, IPluginOption, IPluginClass, IPluginClass2 } from './interface'
 import { useDebounceFn, useResizeObserver } from '@vueuse/core';
-import FabricRuler from './built-In/fabricRuler';
+import { FabricRuler } from './built-In/fabricRuler';
+import { FabricGuide } from './built-In/fabricGuide';
+import { FabricCanvas } from './built-In/fabricCanvas';
+
+
 
 class FabricCore {
     protected _mountEl: HTMLElement | null = null;
     protected _canvasDom: HTMLCanvasElement | null = null;
-    protected canvas: Canvas | null = null;
+    protected canvas: FabricCanvas | null = null;
     protected options: CanvasOptions;
     // 插件map
     protected plubinMap = new Map<string, [IPluginTempl, IPluginOption | undefined]>()
@@ -17,7 +21,7 @@ class FabricCore {
         this.options = options || {} as CanvasOptions;
     }
     // 获取canvas实例
-    getCanvas(): Canvas {
+    getCanvas(): FabricCanvas {
         if (!this.canvas) {
             throw new Error('canvas is not mounted')
         }
@@ -39,12 +43,13 @@ class FabricCore {
         this._installPlugins()
 
         // 画布
-        this.canvas = new Canvas(this._canvasDom, {
+        this.canvas = new FabricCanvas(this._canvasDom, {
             ...this.options,
             width,
             height,
         })
         new FabricRuler(this.canvas);
+        new FabricGuide(this.canvas);
 
         // 监听mountEl resize事件
         const resizeFn = useDebounceFn(([entry]) => {
