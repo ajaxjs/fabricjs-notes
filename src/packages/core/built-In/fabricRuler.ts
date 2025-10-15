@@ -1,12 +1,10 @@
 import { Disposable } from '../utils/lifecycle'
 import { DesignUnitMode } from '../configs/background'
-//import { PiBy180 } from '@/utils/common'
 import { Point, Rect as fabricRect, FabricObject } from 'fabric'
 import type { TAxis, TPointerEventInfo, TPointerEvent } from 'fabric'
 import type { FabricCanvas } from './fabricCanvas'
 import { px2mm } from '../utils/image'
 import { ElementNames } from '../types/elements'
-//import { FabricCanvas } from './fabricCanvas'
 import { ReferenceLine } from '../extension/object/ReferenceLine'
 import { WorkSpaceDrawType } from '../configs/canvas'
 
@@ -56,7 +54,7 @@ export interface RulerOptions {
    */
   highlightColor?: string
   /**
-   * 高亮颜色
+   * 单位名称
    */
   unitName: string
 
@@ -83,7 +81,7 @@ export class FabricRuler extends Disposable {
     super()
     this.canvas = canvas
     this.lastCursor = canvas.defaultCursor
-    this.unitMode = 0 // 默认单位模式
+    this.unitMode = 1 // 默认单位模式
     this.isDark = false // 默认非深色模式
 
     // 合并默认配置
@@ -97,6 +95,8 @@ export class FabricRuler extends Disposable {
       textColor: '#444',
       unitName: 'px',
     }, options)
+    console.log(this.options.unitName);
+
 
     // 设置初始配置
     this.updateTheme(this.isDark)
@@ -194,7 +194,11 @@ export class FabricRuler extends Disposable {
       this.tempReferenceLine.fire('moving', event);
     }
     const status = this.getPointHover(e.viewportPoint)
-    this.canvas.defaultCursor = this.lastCursor
+
+    // 重置光标-防止重复设置 
+    if (['ns-resize', 'ew-resize'].includes(this.canvas.defaultCursor)) {
+      this.canvas.defaultCursor = this.lastCursor
+    }
     if (!status) return
     this.lastCursor = this.canvas.defaultCursor
     this.canvas.defaultCursor = status === 'horizontal' ? 'ns-resize' : 'ew-resize';

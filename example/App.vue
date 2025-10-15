@@ -29,7 +29,7 @@ function setZoom(z: number) {
 	canvas.setZoom(zoom + z)
 	canvas.renderAll()
 }
-function addShape() {
+function addShape(options: any) {
 	const canvas = getCanvas()
 	const shapes = [Rect, Circle, Triangle]
 	const Shape: any = sample(shapes);
@@ -37,10 +37,9 @@ function addShape() {
 	console.log(w, h);
 	const width = random(50, 100)
 	const height = random(50, 100)
-	const left = random(0, w - width)
-	const top = random(0, h - height)
-	const randomNum = Math.floor(Math.random() * 16777216);
-	const fill = `#${randomNum.toString(16).padStart(6, '0')}`
+	const left = random(0, w - width-100)
+	const top = random(0, h - height-100)
+	const fill = `#${Math.floor(Math.random() * 0x666666).toString(16).padStart(6, '0')}`
 
 
 	const rect = new Shape({
@@ -49,7 +48,11 @@ function addShape() {
 		width: width,
 		height: height,
 		fill: fill,
+		...options
 	})
+	console.log(rect);
+	
+
 	canvas.add(rect)
 }
 const exportJson = () => {
@@ -98,6 +101,7 @@ const exportMenu = [
 		<div class="p-1 flex gap-1">
 			<Button variant="outline">Click me</Button>
 			<Button variant="outline" @click="addShape">Add Shap</Button>
+			<Button variant="outline" @click="addShape({ left: 0, top: 0 })">Add 0</Button>
 			<Button variant="outline" @click="setZoom(0.2)">Zoom+</Button>
 			<Button variant="outline" @click="setZoom(-0.2)">Zoom-</Button>
 			<div class="flex-1"></div>

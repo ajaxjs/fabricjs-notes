@@ -1,4 +1,4 @@
-import { Canvas, FabricObject, Line, classRegistry, Point } from "fabric"
+import { FabricObject, Line, classRegistry, Point } from "fabric"
 import type { FabricCanvas } from "../../built-In/fabricCanvas";
 import type { TPointerEventInfo, TPointerEvent } from 'fabric'
 import type { ReferenceLineProps } from "../../types/canvas"
@@ -79,7 +79,7 @@ export class ReferenceLine extends Line {
     return this.height === 0;
   }
 
-  getBoundingRect(absolute?: boolean, calculate?: boolean) {
+  getBoundingRect() {
     this.canvas?.bringObjectToFront(this);
     const isHorizontal = this.isHorizontal();
     const rect = super.getBoundingRect()
