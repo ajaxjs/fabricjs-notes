@@ -14,18 +14,19 @@ export type IEditorHooksType =
 // 插件实例
 export declare class IPluginTempl {
     constructor(canvas: Canvas, core: IFabricCore, options?: IPluginOption);
-    static pluginName: string;
+    static name: string;
     static events: string[];
     static expose: string[];
+    static hotkeys: IHotkey[];
     hotkeyEvent?: (name: string, e: KeyboardEvent) => void;
     hookImportBefore?: (...args: unknown[]) => Promise<unknown>;
     hookImportAfter?: (...args: unknown[]) => Promise<unknown>;
     hookSaveBefore?: (...args: unknown[]) => Promise<unknown>;
     hookSaveAfter?: (...args: unknown[]) => Promise<unknown>;
     hookTransform?: (...args: unknown[]) => Promise<unknown>;
-    [propName: string]: any;
     canvas?: Canvas;
     core?: IFabricCore;
+    [propName: string]: any;
 }
 
 export declare interface IPluginOption {
@@ -44,4 +45,12 @@ export declare interface IPluginMenu {
     text: string;
     command?: () => void;
     child?: IPluginMenu[];
+}
+
+
+// 定义快捷按键类型
+export type IHotkey = {
+    hotkey: string;   // 快捷按键
+    label: string;     // 快捷按键描述
+    handler?: (e: KeyboardEvent) => void; // 快捷按键触发事件
 }

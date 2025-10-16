@@ -17,7 +17,9 @@ class FabricCore {
     // 插件map
     protected plubinMap = new Map<string, [IPluginTempl, IPluginOption | undefined]>()
     // 插件实例map
-    protected plugins = new Map<string, IPluginClass2>()
+    protected plugins: Record<string, IPluginClass2> = {};//new Map<string, IPluginClass2>();
+    [key: string]: any;
+    
     constructor(options?: CanvasOptions) {
         this.options = options || {} as CanvasOptions;
     }
@@ -67,7 +69,7 @@ class FabricCore {
         if (this.canvas) {
             throw new Error('Please use plugins before mounting')
         }
-        const { pluginName } = plugin
+        const { name: pluginName } = plugin
         if (this.plubinMap.has(pluginName)) {
             throw new Error(`plugin ${pluginName} already used`)
         }
@@ -76,9 +78,15 @@ class FabricCore {
     // 安装插件
     protected _installPlugins() {
         // mounted后安装插件
-        this.plubinMap.forEach(([plugin, options]) => {
+        this.plubinMap.forEach(([plugin, options], pluginName) => {
+            const { expose } = plugin;
             const pluginInstance = new (plugin as IPluginClass)(this.canvas!, this, options)
-            this.plugins.set(plugin.pluginName, pluginInstance)
+            //this.plugins.set(pluginName, pluginInstance)
+            this.plugins[pluginName] = pluginInstance
+            // 暴露插件方法
+            expose.forEach((item: string) => {
+                this[item] = pluginInstance[item]
+            })
         })
     }
     // 销毁canvas

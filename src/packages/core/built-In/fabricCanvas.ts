@@ -2,11 +2,45 @@ import { Canvas } from 'fabric';
 import type { CanvasOptions, TMat2D } from 'fabric';
 import { FabricRuler } from './fabricRuler';
 import hotkeys from 'hotkeys-js';
+import { Group } from 'fabric';
+
 
 export class FabricCanvas extends Canvas {
 	ruler?: FabricRuler
 	constructor(el: string | HTMLCanvasElement, options: CanvasOptions) {
 		super(el, options)
+
+		// 组合选中对象
+		hotkeys('ctrl+g', (e) => {
+			const activeObjects = this.getActiveObjects()
+
+			if (activeObjects.length > 1) {
+				e.preventDefault();
+				const group = new Group(activeObjects)
+				this.add(group)
+				this.remove(...activeObjects)
+				this.setActiveObject(group)
+				console.log(activeObjects, group);
+			}
+		})
+		// 取消组合选中对象
+		hotkeys('ctrl+shift+g', (e) => {
+			e.preventDefault();
+			const activeObjects = this.getActiveObjects()
+
+			activeObjects.forEach((item) => {
+				if (item instanceof Group) {
+					console.log('取消组合选中对象', item);
+					this.add(...item.removeAll())
+					this.remove(item)
+				}
+			})
+
+			//this.discardActiveObject()
+			this.requestRenderAll()
+
+		})
+
 		// 删除
 		hotkeys('delete', () => {
 			this.getActiveObjects().forEach((item) => {
@@ -32,9 +66,9 @@ export class FabricCanvas extends Canvas {
 		// 监听键盘释放事件  
 		document.addEventListener('keyup', (e) => {
 			if (e.code === 'Space') {
+				this.setCursor('default');
 				isPanning = false;
 				this.selection = true; // 恢复选择功能  
-				this.setCursor('default');
 			}
 		});
 

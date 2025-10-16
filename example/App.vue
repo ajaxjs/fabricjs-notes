@@ -3,20 +3,14 @@ import { ref } from 'vue'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu } from '@/components/qxt-vue/dropdown-menu'
 import { Editor } from '@/packages/editor'
-import { random, sample } from 'es-toolkit'
+import { random } from 'es-toolkit'
 
-import { Rect, Circle, Triangle } from 'fabric'
+import { Rect, Ellipse, Triangle } from 'fabric'
 
 
 
 const editorRef = ref()
-function destroyEditor() {
-	console.log(editorRef.value);
-	if (editorRef.value) {
-
-		editorRef.value.editor.destroy()
-	}
-}
+// Editor cleanup function is handled elsewhere
 function getCanvas() {
 	const { editor } = editorRef.value
 	return editor.getCanvas()
@@ -31,29 +25,33 @@ function setZoom(z: number) {
 }
 function addShape(options: any) {
 	const canvas = getCanvas()
-	const shapes = [Rect, Circle, Triangle]
-	const Shape: any = sample(shapes);
+	const shapes = [Ellipse, Rect, Triangle]
+	// 使用Math.floor确保返回整数索引
+	const rid = Math.floor(random(0, shapes.length))
 	const { width: w, height: h } = canvas;
 	console.log(w, h);
-	const width = random(50, 100)
-	const height = random(50, 100)
-	const left = random(0, w - width-100)
-	const top = random(0, h - height-100)
+	const width = Math.floor(random(50, 100))
+	const height = Math.floor(random(50, 100))
+	const left = Math.floor(random(100, w - width - 200))
+	const top = Math.floor(random(100, h - height - 200))
 	const fill = `#${Math.floor(Math.random() * 0x666666).toString(16).padStart(6, '0')}`
 
-
-	const rect = new Shape({
+	const size = rid ? { width, height } : { rx: height, ry: width }
+	const opts = {
 		left: left,
 		top: top,
-		width: width,
-		height: height,
 		fill: fill,
+		...size,
 		...options
-	})
-	console.log(rect);
-	
-
-	canvas.add(rect)
+	}
+	// 确保shapes[rid]是构造函数
+	if (typeof shapes[rid] === 'function') {
+		const shape = new (shapes[rid] as new (options: any) => any)(opts)
+		canvas.add(shape)
+		console.log('Shape added:', shape.type, opts)
+	} else {
+		console.error('Invalid shape constructor at index:', rid, shapes[rid])
+	}
 }
 const exportJson = () => {
 	const canvas = getCanvas()
@@ -100,7 +98,7 @@ const exportMenu = [
 	<div class="w-screen h-screen border-gray-200 flex flex-col overflow-hidden p-5">
 		<div class="p-1 flex gap-1">
 			<Button variant="outline">Click me</Button>
-			<Button variant="outline" @click="addShape">Add Shap</Button>
+			<Button variant="outline" @click="addShape({})">Add Shap</Button>
 			<Button variant="outline" @click="addShape({ left: 0, top: 0 })">Add 0</Button>
 			<Button variant="outline" @click="setZoom(0.2)">Zoom+</Button>
 			<Button variant="outline" @click="setZoom(-0.2)">Zoom-</Button>

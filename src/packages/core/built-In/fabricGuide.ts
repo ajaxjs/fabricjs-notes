@@ -1,5 +1,5 @@
 
-import { StaticCanvas, Canvas, ActiveSelection, FabricObject, Group, Point, util } from 'fabric'
+import { StaticCanvas, Canvas, ActiveSelection, FabricObject, Group, Point } from 'fabric'
 import { Disposable } from '../utils/lifecycle'
 import { check } from '../utils/check'
 
@@ -352,8 +352,18 @@ export class FabricGuide extends Disposable {
 
   private drawLine(x1: number, y1: number, x2: number, y2: number) {
     const ctx = this.canvas.getTopContext()
-    const point1 = util.transformPoint(new Point(x1, y1), this.canvas.viewportTransform)
-    const point2 = util.transformPoint(new Point(x2, y2), this.canvas.viewportTransform)
+    // const point1 = util.transformPoint(new Point(x1, y1), this.canvas.viewportTransform)
+    // const point2 = util.transformPoint(new Point(x2, y2), this.canvas.viewportTransform)
+    // 使用直接的矩阵变换替代util.transformPoint
+    const vpt = this.canvas.viewportTransform;
+    const point1 = new Point(
+      x1 * vpt[0] + y1 * vpt[2] + vpt[4],
+      x1 * vpt[1] + y1 * vpt[3] + vpt[5]
+    );
+    const point2 = new Point(
+      x2 * vpt[0] + y2 * vpt[2] + vpt[4],
+      x2 * vpt[1] + y2 * vpt[3] + vpt[5]
+    )
 
     // use origin canvas api to draw guideline
     ctx.save()
