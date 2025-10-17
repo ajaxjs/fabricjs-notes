@@ -63,7 +63,7 @@ const exportPng = () => {
 	canvas.toBlob({
 		format: 'png',      // 'png' 或 'jpeg',默认 'png'  
 		quality: 1,         // 0-1 之间,仅用于 jpeg,默认 1  
-		multiplier: 1,      // 缩放倍数,默认 1  
+		multiplier: 12,      // 缩放倍数,默认 1  
 		enableRetinaScaling: false  // 是否启用 Retina 缩放,默认 false 
 	}).then((blob: Blob) => {
 		console.log(blob);

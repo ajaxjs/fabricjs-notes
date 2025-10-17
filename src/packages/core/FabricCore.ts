@@ -6,6 +6,9 @@ import { useDebounceFn, useResizeObserver } from '@vueuse/core';
 import { FabricRuler } from './built-In/fabricRuler';
 import { FabricGuide } from './built-In/fabricGuide';
 import { FabricCanvas } from './built-In/fabricCanvas';
+import { FabricFrame } from './built-In/fabricFrame';
+import { FabricHotkey } from './built-In/fabricHotkey';
+import { FabricControl } from './built-In/fabricControl';
 //import { initAligningGuidelines } from './built-In/Guideline';
 
 class FabricCore {
@@ -16,7 +19,7 @@ class FabricCore {
     // 插件map
     protected plubinMap: IPluginMap = new Map()
     // 插件实例map
-    protected plugins: Record<string, IPluginClass2> = {};//new Map<string, IPluginClass2>();
+    protected plugins: Record<string, IPluginClass2> = {};
     [key: string]: any;
 
     constructor(options?: CanvasOptions) {
@@ -54,6 +57,12 @@ class FabricCore {
         // 内置插件
         new FabricRuler(this.canvas);
         new FabricGuide(this.canvas);
+        // 画板插件
+        this.canvas.use(FabricFrame);
+        // 内置热键插件
+        this.canvas.use(FabricHotkey);
+        // 基础控制插件
+        this.canvas.use(FabricControl);
 
         // 安装插件
         this.plubinMap.forEach(([plugin, options]) => this._pluginInstaller(plugin, options))

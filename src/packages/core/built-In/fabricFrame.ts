@@ -1,45 +1,37 @@
-import { Rect, Group } from 'fabric'
-import Background from '../extension/object/Background'
-import type { RectProps } from 'fabric'
-import type { IPluginOption, IPluginTempl, IFabricCore } from '../interface/plugin'
-import type { BackgroundProps } from '../extension/object/Background'
-import type { FabricCanvas } from '../built-In/fabricCanvas'
+import { Rect } from 'fabric'
+import type { IFrameOptions, IHotkey, CorePluginTemp } from '../interface'
+import type { FabricCanvas } from './fabricCanvas'
 
-interface BoardPluginOptions extends IPluginOption {
-    width: number
-    height: number
-}
-
-export default class BoardPlugin implements IPluginTempl {
-    static name = 'Board'
-    static events: string[] = []
-    static expose: string[] = ['addBoard']
+export class FabricFrame implements CorePluginTemp {
+    static pluginName: string = 'Frame';
+    hotkeys: IHotkey[] = [];
     canvas: FabricCanvas
-    editor: IFabricCore
-    options: BoardPluginOptions
-    top: number = 0
     left: number = 0
-    overlay: Group | null = null
-    hotkeyEvent?: (name: string, e: KeyboardEvent) => void;
-
-    constructor(canvas: FabricCanvas, editor: IFabricCore, options: BoardPluginOptions) {
+    top: number = 0
+    width: number = 0
+    height: number = 0
+    clipPath?: Rect
+    constructor(canvas: FabricCanvas) {
         this.canvas = canvas
-        this.editor = editor
-        this.options = options
-
     }
 
-    addBoard(props: BoardPluginOptions, overlayProps: RectProps) {
-        let zoom = this.canvas.getZoom()
+    setFrame(props: IFrameOptions) {
         const { width: canvaWidth, height: canvaHeight } = this.canvas
         const { width, height } = props
-        this.left = (canvaWidth - width) / 2
-        this.top = (canvaHeight - height) / 2
-        const bg = new Background(props)
+        this.left = (canvaWidth - width) / 2;
+        this.top = (canvaHeight - height) / 2;
+        this.width = width;
+        this.height = height;
+        const { overlayFill, ...rectProps } = props
+        const bg = new Rect({
+            selectable: false,
+            evented: false,
+            ...rectProps
+        })
         this.canvas.add(bg)
+        //this.canvas.sendToBack(bg)
         this.canvas.setViewportTransform([1, 0, 0, 1, this.left, this.top])
-        console.log('--c', zoom, this.top);
-
+        this.clipPath = new Rect(rectProps);
 
         // 防止重复绘制
         let beforeRunder = false;
@@ -48,21 +40,19 @@ export default class BoardPlugin implements IPluginTempl {
             if (beforeRunder) {
                 beforeRunder = false;
                 // 绘制遮罩
-                this.drawOverlay.apply(this, [props])
+                this.darwFrame.apply(this, [props])
             }
         })
-
-
     }
 
-    drawOverlay(props: BoardPluginOptions) {
+    darwFrame(props: IFrameOptions) {
         const { ruler } = this.canvas
         const ctx = this.canvas.contextContainer;
         const ruleSize = ruler?.options.ruleSize || 0;
         const left = ruleSize, top = ruleSize;
         let [zoomX, , , zoomY, vptX, vptY] = this.canvas.viewportTransform;
         let { width: canvaWidth, height: canvaHeight } = this.canvas;
-        let { width: boardWidth, height: boardHeight } = props;
+        let { width: boardWidth, height: boardHeight, overlayFill = 'rgba(100, 100, 100, 0.8)' } = props;
         // 计算缩放后的宽度和高度
         boardWidth *= zoomX
         boardHeight *= zoomY
@@ -77,14 +67,12 @@ export default class BoardPlugin implements IPluginTempl {
         // 绘制遮罩
         ctx.save()
         ctx.beginPath()
-        ctx.fillStyle = 'rgba(100, 100, 100, 0.8)';
+        ctx.fillStyle = overlayFill;
         ctx.rect(left, top, canvaWidth, topHeight);// 上
         ctx.rect(left, buttonTop, canvaWidth, buttonHeight);// 下
         ctx.rect(left, top, leftWidth, canvaHeight);// 左
         ctx.rect(rightLeft, top, rightWidth, canvaHeight);// 右
         ctx.fill()
         ctx.restore()
-
     }
-
 }
