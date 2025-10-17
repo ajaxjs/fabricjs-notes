@@ -1,75 +1,132 @@
-import { Rect } from 'fabric'
+import { Rect, Group } from 'fabric'
 import Background from '../extension/object/Background'
-import type { Canvas } from 'fabric'
+import type { RectProps } from 'fabric'
 import type { IPluginOption, IPluginTempl, IFabricCore } from '../interface/plugin'
 import type { BackgroundProps } from '../extension/object/Background'
+import type { FabricCanvas } from '../built-In/fabricCanvas'
 
-
+interface BoardPluginOptions extends IPluginOption {
+    width: number
+    height: number
+}
 
 export default class BoardPlugin implements IPluginTempl {
     static name = 'Board'
     static events: string[] = []
     static expose: string[] = ['addBoard']
-    canvas: Canvas
-    core: IFabricCore
-    options: IPluginOption
+    canvas: FabricCanvas
+    editor: IFabricCore
+    options: BoardPluginOptions
+    top: number = 0
+    left: number = 0
+    overlay: Group | null = null
     hotkeyEvent?: (name: string, e: KeyboardEvent) => void;
 
-    constructor(canvas: Canvas, core: IFabricCore, options: IPluginOption) {
+    constructor(canvas: FabricCanvas, editor: IFabricCore, options: BoardPluginOptions) {
         this.canvas = canvas
-        this.core = core
+        this.editor = editor
         this.options = options
+
     }
 
-    addBoard(props: BackgroundProps) {
+    addBoard(props: BoardPluginOptions, overlayProps: RectProps) {
+        let zoom = this.canvas.getZoom()
         const { width: cw, height: ch } = this.canvas
         const { width, height } = props
-        const x = (cw - width) / 2
-        const y = (ch - height) / 2
-        const board = new Background(props)
-        this.canvas.add(board)
-        this.canvas.setViewportTransform([1, 0, 0, 1, x, y])
+        this.left = (cw - width) / 2
+        this.top = (ch - height) / 2
+        const bg = new Background(props)
+        this.canvas.add(bg)
+        this.canvas.setViewportTransform([1, 0, 0, 1, this.left, this.top])
+        console.log('--c', zoom, this.top);
 
-        const _maskW = cw * 2
-        const _maskH = ch * 2
-        const _maskX = (_maskW / 2) - width / 2
-        const _maskY = (_maskH / 2) - height / 2
 
-        const mask = new Rect({
-            left: -_maskX,
-            top: -_maskY,
-            width: _maskW,
-            height: _maskH,
-            fill: 'rgba(150, 150, 150, 0.7)', // 半透明黑色  
-            selectable: false,
-            evented: false,
-            excludeFromExport: true // 导出时不包含  
-        });
-        const mask_clip = new Rect({
-            ...board,
-            left: -width / 2,
-            top: -height / 2,
+        let beforeRunder = false;
+        this.canvas.on('before:render', () => beforeRunder = true);
+        this.canvas.on('after:render', () => {
+            // 防止重复绘制
+            if (!beforeRunder) return
+            beforeRunder = false;
+            // 绘制遮罩
+            this.drawOverlay.apply(this, [props])
         })
-        // 将 canvas 的 clipPath 作为遮罩的反向 clipPath  
-        mask.clipPath = mask_clip;
-        mask.clipPath.inverted = true; // 反向裁剪,只显示 clipPath 外部
-        this.canvas.add(mask)
-        this.canvas.bringObjectToFront(mask)
 
-        this.canvas.on('object:added', (e) => {
-            //if (e.target === mask) {}
-            //console.log(e);
 
-            this.canvas.bringObjectToFront(mask)
-        })
-        //this.canvas.clipPath = board;
-        //this.canvas.overlayColor = 'rgba(0, 0, 0, 0.5)'
+    }
+    drawOverlay(props: BoardPluginOptions) {
+        //if (!this.overlay) return
+        //this.overlay.set('dirty', true); 
+        //const { width, height } = this.options
+        const { ruler } = this.canvas
+        const ctx = this.canvas.contextContainer;
+        const zoom = this.canvas.getZoom()
+        let { width: cw, height: ch } = this.canvas;
+        let { width: bw, height: bh } = props
+        let [, , , , vptX, vptY] = this.canvas.viewportTransform
+        let left = 0, top = 0;
+        console.log('drawOverlay', cw, ch, '-', vptX, vptY);
+        console.log(ctx);
+        bw *= zoom
+        bh *= zoom
 
-        console.log('addBoard', board);
-        //const bg = new Rect({ ...props, fill: '#ffee99', excludeFromExport: true });
-        //this.canvas.add(bg)
-        //this.canvas.sendObjectToBack(bg)
+
+        if (ruler) {
+            const { ruleSize } = ruler.options;
+            top = ruleSize
+            left = ruleSize
+            cw -= ruleSize
+            ch -= ruleSize
+        }
+
+        // 绘制遮罩,思路：画4个矩形，分别遮住4个边(负数为0)
+        ctx.save()
+        ctx.beginPath()
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'
+        ctx.rect(left, top, cw, vptY - top)
+        ctx.rect(left, vptY + bh, cw, vptY)
+        ctx.rect(left, top, vptX - left, ch)
+        ctx.rect(vptX + bw, top, vptX + cw, ch)
+        ctx.fill()
+        ctx.restore()
 
     }
 
 }
+
+/* // 遮罩
+        const overlayPub = {
+            selectable: false,
+            evented: false,
+            excludeFromExport: true,
+        }
+        overlayProps = Object.assign({
+            fill: '#000000',
+        }, overlayProps, overlayPub)
+
+        const oW = cw * 1.2
+        const oH = ch * 1.2
+        const oX = (cx + (oW-cw) / 2)
+        const oY = (cy + (oH-ch) / 2)
+        this.overlay = new Group([
+            new Rect({ width: oW, height: oH, stroke: 'red', fill: '', }),
+            new Rect({ ...overlayProps, width: oW, height: oY }),
+            new Rect({ ...overlayProps, width: oX, height: oH, left: oX + width, top: 0 }),
+            new Rect({ ...overlayProps, width: oW, height: oY, left: 0, top: oY + height }),
+            new Rect({ ...overlayProps, width: oX, height: oH }),
+        ], {
+            ...overlayPub,
+            left: -oX,
+            top: -oY,
+            opacity: 0.5,
+        })
+        this.canvas.add(this.overlay)
+        this.canvas.preserveObjectStacking = true;
+        this.canvas.on('after:render', () => {
+            this.canvas.bringObjectToFront(this.overlay!)
+            const currentZoom = this.canvas.getZoom();
+            if (currentZoom !== zoom) {
+                zoom = currentZoom
+                this.overlay?.set('dirty', true); 
+            }
+        })
+        */

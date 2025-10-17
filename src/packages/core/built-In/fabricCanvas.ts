@@ -4,9 +4,11 @@ import { FabricRuler } from './fabricRuler';
 import hotkeys from 'hotkeys-js';
 import { Group } from 'fabric';
 
+import { Rect } from 'fabric';
 
 export class FabricCanvas extends Canvas {
 	ruler?: FabricRuler
+	exportClipPath?: Rect
 	constructor(el: string | HTMLCanvasElement, options: CanvasOptions) {
 		super(el, options)
 
@@ -79,6 +81,7 @@ export class FabricCanvas extends Canvas {
 				this.setCursor('grabbing');
 				lastPosX = evt.clientX;
 				lastPosY = evt.clientY;
+				this.fire('canvas:startmove', { x: lastPosX, y: lastPosY })
 			}
 		});
 
@@ -93,6 +96,7 @@ export class FabricCanvas extends Canvas {
 				this.setViewportTransform(vpt);
 				lastPosX = evt.clientX;
 				lastPosY = evt.clientY;
+				this.fire('canvas:moveing', { x: -vpt[4], y: -vpt[5] })
 			}
 		});
 
@@ -100,6 +104,7 @@ export class FabricCanvas extends Canvas {
 		this.on('mouse:up', () => {
 			if (isPanning) {
 				this.setCursor('grab');
+				this.fire('canvas:endmove', { x: lastPosX, y: lastPosY })
 			}
 		});
 
@@ -122,7 +127,6 @@ export class FabricCanvas extends Canvas {
 			opt.e.preventDefault();
 			opt.e.stopPropagation();
 		})
-
 
 	}
 }

@@ -1,7 +1,10 @@
 import type { FabricCore } from '../'
 import type { Canvas } from 'fabric'
+import type { FabricCanvas } from '../built-In/fabricCanvas'
 
-export interface IFabricCore extends FabricCore { }
+export interface IFabricCore extends FabricCore {
+     [key: string]: any;
+}
 
 // 生命周期事件类型
 export type IEditorHooksType =
@@ -13,7 +16,7 @@ export type IEditorHooksType =
 
 // 插件实例
 export declare class IPluginTempl {
-    constructor(canvas: Canvas, core: IFabricCore, options?: IPluginOption);
+    constructor(canvas: FabricCanvas, core: IFabricCore, options?: IPluginOption);
     static name: string;
     static events: string[];
     static expose: string[];
@@ -24,7 +27,7 @@ export declare class IPluginTempl {
     hookSaveBefore?: (...args: unknown[]) => Promise<unknown>;
     hookSaveAfter?: (...args: unknown[]) => Promise<unknown>;
     hookTransform?: (...args: unknown[]) => Promise<unknown>;
-    canvas?: Canvas;
+    canvas?: FabricCanvas;
     core?: IFabricCore;
     [propName: string]: any;
 }
@@ -38,8 +41,10 @@ export declare class IPluginClass2 extends IPluginTempl {
 }
 // 插件class
 export declare interface IPluginClass {
-    new(canvas: Canvas, core: IFabricCore, options?: IPluginOption): IPluginClass2;
+    new(canvas: FabricCanvas, core: IFabricCore, options?: IPluginOption): IPluginClass2;
 }
+
+export type IPluginMap = Map<string, [IPluginTempl, IPluginOption | undefined]>
 
 export declare interface IPluginMenu {
     text: string;

@@ -16,13 +16,9 @@ onMounted(() => {
     app.mount(editorRef.value)
     const canvas = app.getCanvas()
     canvas.backgroundColor = '#f0f0f0'
-    console.log(app);
+    //console.log(app);
 
-    app.addBoard({
-        width: 400,
-        height: 600,
-        fill: '#f0f0f0',
-    })
+    app.addBoard({ width: 400, height: 600, fill: '#f0f0f0', })
     //canvas.renderAll()
     /*
     const circle = new Circle({

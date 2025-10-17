@@ -10,6 +10,16 @@ import { WorkSpaceDrawType } from '../configs/canvas'
 
 type Rect = { left: number; top: number; width: number; height: number }
 
+type IDrawRect = {
+  left: number
+  top: number
+  width: number
+  height: number
+  fill?: string | CanvasGradient | CanvasPattern
+  stroke?: string
+  strokeWidth?: number
+}
+
 const PiBy180 = Math.PI / 180
 
 /**
@@ -95,8 +105,6 @@ export class FabricRuler extends Disposable {
       textColor: '#444',
       unitName: 'px',
     }, options)
-    console.log(this.options.unitName);
-
 
     // 设置初始配置
     this.updateTheme(this.isDark)
@@ -110,7 +118,7 @@ export class FabricRuler extends Disposable {
       'referenceline:mouseup': this.referenceLineMouseup.bind(this),
     }
     this.enabled = this.options.enabled
-    //canvas.ruler = this as any
+    canvas.ruler = this as any
   }
 
   /**
@@ -467,15 +475,7 @@ export class FabricRuler extends Disposable {
       fill,
       stroke,
       strokeWidth,
-    }: {
-      left: number
-      top: number
-      width: number
-      height: number
-      fill?: string | CanvasGradient | CanvasPattern
-      stroke?: string
-      strokeWidth?: number
-    },
+    }: IDrawRect,
   ) {
     ctx.save()
     ctx.beginPath()
