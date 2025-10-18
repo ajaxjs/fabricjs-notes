@@ -26,3 +26,8 @@ export interface IFrameOptions {
     fill: string
     overlayFill: string
 }
+
+// 滚轮工具
+export type IWheelTool = 'zoom' | 'scroll';
+// 光标工具
+export type ICursorTool = 'move' | 'pan' | 'draw';

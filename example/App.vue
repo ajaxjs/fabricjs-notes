@@ -1,13 +1,19 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu } from '@/components/qxt-vue/dropdown-menu'
 import { Editor } from '@/packages/editor'
 import { random } from 'es-toolkit'
+import { FabricCanvas } from '@/packages/core/built-In/fabricCanvas'
 
 import { Rect, Ellipse, Triangle } from 'fabric'
 
+let canvas: FabricCanvas | null = null;
+onMounted(() => {
+	canvas = getCanvas()
+	console.log(canvas);
 
+})
 
 const editorRef = ref()
 // Editor cleanup function is handled elsewhere
@@ -29,7 +35,6 @@ function addShape(options: any) {
 	// 使用Math.floor确保返回整数索引
 	const rid = Math.floor(random(0, shapes.length))
 	const { width: w, height: h } = canvas;
-	console.log(w, h);
 	const width = Math.floor(random(50, 100))
 	const height = Math.floor(random(50, 100))
 	const left = Math.floor(random(100, w - width - 200))
@@ -84,9 +89,18 @@ const exportSvg = () => {
 	})
 	console.log(svg);
 }
-
-
-
+// 切换平移工具
+const currentTool = ref('move')
+const togglePan = () => {
+	const canvas = getCanvas()
+	const isPanning = canvas.currentTool === 'pan'
+	if (isPanning) {
+		currentTool.value = 'move'
+	} else {
+		currentTool.value = 'pan'
+	}
+	canvas.currentTool = currentTool.value
+}
 const exportMenu = [
 	{ label: 'Export as JSON', onClick: exportJson },
 	{ label: 'Export as PNG', onClick: exportPng },
@@ -102,6 +116,10 @@ const exportMenu = [
 			<Button variant="outline" @click="addShape({ left: 0, top: 0 })">Add 0</Button>
 			<Button variant="outline" @click="setZoom(0.2)">Zoom+</Button>
 			<Button variant="outline" @click="setZoom(-0.2)">Zoom-</Button>
+			<Button variant="outline" :class="currentTool === 'pan' ? 'border-blue-500 text-blue-500' : ''"
+				@click="togglePan()">
+				{{ currentTool }}
+			</Button>
 			<div class="flex-1"></div>
 			<DropdownMenu :items="exportMenu">
 				<Button variant="outline">Export</Button>

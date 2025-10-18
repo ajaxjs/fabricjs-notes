@@ -1,24 +1,18 @@
-import { Canvas } from 'fabric';
-import type { CanvasOptions, TMat2D, TSVGExportOptions, TSVGReviver } from 'fabric';
-//import { FabricRuler } from './fabricRuler';
-import type { CorePluginClass } from '../interface/core'
-import type { IHotkey } from '../interface';
-
 import hotkeys from 'hotkeys-js';
-import { Group } from 'fabric';
-
+import { Canvas } from 'fabric';
+import type { CanvasOptions, TSVGExportOptions, TSVGReviver } from 'fabric';
+import type { CorePluginClass } from '../interface/core'
+import type { IHotkey, IWheelTool, ICursorTool } from '../interface';
 import type { TDataUrlOptions } from 'fabric';
 
 export class FabricCanvas extends Canvas {
-	//ruler?: FabricRuler;
-	//pluginMap: Record<string, CorePluginClass> = {};
-	//exportClipPath?: Rect
 	[key: string]: any;
+	// 当前光标操作工具 (move:移动, pan：平移, draw:绘制)
+	cursorTool: ICursorTool = 'move';
+	// 滚轮工具
+	wheelTool: IWheelTool = 'scroll';
 	constructor(el: string | HTMLCanvasElement, options: CanvasOptions) {
 		super(el, options)
-
-		
-
 	}
 	// 重写导出blob
 	override toBlob(options?: TDataUrlOptions) {
