@@ -1,6 +1,7 @@
 
 import { StaticCanvas, Canvas, ActiveSelection, FabricObject, Group, Point } from 'fabric'
-import { Disposable } from '../utils/lifecycle'
+import type { IHotkey, CorePluginTemp } from '../interface'
+import type { FabricCanvas } from './fabricCanvas'
 import { check } from '../utils/check'
 
 type VerticalLineCoords = {
@@ -34,7 +35,11 @@ const Keys = <T extends object>(obj: T): (keyof T)[] => {
   return Object.keys(obj) as (keyof T)[]
 }
 
-export class FabricGuide extends Disposable {
+export class FabricGuide implements CorePluginTemp {
+  static pluginName: string = 'Guide'
+  hotkeys: IHotkey[] = [];
+  canvas: FabricCanvas
+
   private canvasEvents
 
   private aligningLineMargin = 10
@@ -47,11 +52,8 @@ export class FabricGuide extends Disposable {
   private ignoreObjTypes: IgnoreObjTypes = []
   private pickObjTypes: IgnoreObjTypes = []
   private dirty = false
-  private canvas: Canvas
 
-  constructor(canvas: Canvas) {
-    super()
-
+  constructor(canvas: FabricCanvas) {
     this.canvas = canvas
 
     const mouseUp = () => {
@@ -427,7 +429,6 @@ export class FabricGuide extends Disposable {
   }
 
   public dispose(): void {
-    super.dispose()
     this.canvas.off(this.canvasEvents)
   }
 }

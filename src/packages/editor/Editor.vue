@@ -1,29 +1,19 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { FabricCore } from '../core'
+
 // 移除未使用的导入
 //import type { IPluginTemplate } from '../core/interface/plugin'
 //import { BoardPlugin } from '../core/plugins'
-
-const app = new FabricCore();
-//app.use(BoardPlugin)
-
+const emit = defineEmits(['mounted'])
 const editorRef = ref();
+const app = new FabricCore();
 
 onMounted(() => {
-
-
     app.mount(editorRef.value)
     const canvas = app.getCanvas()
-    console.log(canvas.frame);
+    nextTick(() => emit('mounted', canvas, app))
     
-    canvas.frame.setFrame({
-        width: 400,
-        height: 600,
-        fill: '#ffffff',
-    })
-    canvas.backgroundColor = '#f0f0f0'
-    //console.log(app);
 
     //app.addBoard({ width: 400, height: 600, fill: '#f0f0f0', })
     //canvas.renderAll()

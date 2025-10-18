@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, nextTick } from 'vue'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu } from '@/components/qxt-vue/dropdown-menu'
 import { Editor } from '@/packages/editor'
@@ -7,7 +7,7 @@ import { random } from 'es-toolkit'
 import { FabricCanvas } from '@/packages/core/built-In/fabricCanvas'
 
 import { Rect, Ellipse, Triangle, IText, Path, FabricText } from 'fabric'
-import { ArcText } from '@/packages/core/extension/object/ArcText'
+// import { ArcText } from '@/packages/core/extension/object/ArcText'
 
 let canvas: FabricCanvas | null = null;
 
@@ -28,41 +28,6 @@ const makePath = (textObj: FabricText) => {
 		strokeWidth: 1
 	});
 };
-onMounted(() => {
-	canvas = getCanvas()
-	console.log(canvas);
-	if (canvas) {
-
-		const arcText = new IText('2026年12生肖运程', {
-			left: 100,
-			top: 100,
-			fill: '#ff0000',
-			lineHeight: 1.5,
-			fontSize: 40,
-			//charSpacing: -50,
-			//editable: true,
-		})
-
-		const pathObject = makePath(arcText);
-
-		arcText.set('path', pathObject);
-		arcText.set('pathStartOffset', 0);
-		setTimeout(() => {
-			console.log(arcText.__charBounds[0]);
-		}, 0);
-
-		arcText.on('editing:entered', () => {
-			arcText.set('path', null)
-			console.log('editing:entered');
-		})
-		arcText.on('editing:exited', () => {
-			arcText.set('path', pathObject);
-			console.log('editing:exited');
-		})
-
-		canvas.add(arcText)
-	}
-})
 
 const editorRef = ref()
 // Editor cleanup function is handled elsewhere
@@ -164,6 +129,45 @@ function importJson() {
 	console.log(json);
 
 }
+function onEditorMounted(canvas: FabricCanvas) {
+	console.log('-onEditorMounted', canvas);
+	// 初始化canvas尺寸
+	canvas.frame.setFrame({
+        width: 400,
+        height: 600,
+        fill: '#ffffff',
+    })
+    // canvas.backgroundColor = '#f0f0f0'
+	
+	const arcText = new IText('HelloWorld!', {
+		left: 100,
+		top: 100,
+		fill: '#ff0000',
+		lineHeight: 1.5,
+		fontSize: 40,
+		//charSpacing: -50,
+		//editable: true,
+	})
+
+	const pathObject = makePath(arcText);
+
+	arcText.set('path', pathObject);
+	arcText.set('pathStartOffset', 0);
+	setTimeout(() => {
+		console.log(arcText.__charBounds[0]);
+	}, 0);
+
+	arcText.on('editing:entered', () => {
+		arcText.set('path', null)
+		console.log('editing:entered');
+	})
+	arcText.on('editing:exited', () => {
+		arcText.set('path', pathObject);
+		console.log('editing:exited');
+	})
+
+	canvas.add(arcText)
+}
 </script>
 
 <template>
@@ -185,7 +189,7 @@ function importJson() {
 			</DropdownMenu>
 			<!--<Button variant="outline" @click="destroyEditor">Destroy</Button>-->
 		</div>
-		<Editor ref="editorRef" class="flex-1" />
+		<Editor ref="editorRef" class="flex-1" @mounted="onEditorMounted" />
 	</div>
 </template>
 

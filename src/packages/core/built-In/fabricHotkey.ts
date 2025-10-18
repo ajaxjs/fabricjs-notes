@@ -7,7 +7,7 @@ import type { FabricCanvas } from './fabricCanvas'
 import { Group } from 'fabric'
 
 export class FabricHotkey implements CorePluginTemp {
-    pluginName = 'Hotkey';
+    static pluginName = 'Hotkey';
     canvas: FabricCanvas;
     hotkeys: IHotkey[] = [
         { hotkey: 'ctrl+g', label: '组合对象', handler: this.group },

@@ -7,9 +7,12 @@ import type { FabricCanvas } from './fabricCanvas'
 import type { TMat2D, Point } from 'fabric'
 
 export class FabricControl implements CorePluginTemp {
-    pluginName = 'Control';
+    static pluginName = 'Control';
     canvas: FabricCanvas;
     hotkeys: IHotkey[] = [];
+    protected isPanning = false;
+    protected lastPosX = 0;
+    protected lastPosY = 0;
     constructor(canvas: FabricCanvas) {
         this.canvas = canvas;
 
@@ -51,83 +54,69 @@ export class FabricControl implements CorePluginTemp {
     // 拖拽平移画布
     protected _bindPanCanvas() {
         const { canvas } = this;
-        let isPanning = false;
-        let lastPosX = 0;
-        let lastPosY = 0;
+        
         // 监听键盘按下事件  
-        document.addEventListener('keydown', (e: any) => {
-            if (e.code === 'Space' && !isPanning) {
-                e.preventDefault();
-                isPanning = true;
-                canvas.selection = false; // 禁用选择功能 
-                canvas.currentTool = 'pan'; // 切换到平移工具
-                canvas.setCursor('grab');
-            }
-        });
+        document.addEventListener('keydown', this._spaceDown.bind(this));
 
         // 监听键盘释放事件  
-        document.addEventListener('keyup', (e) => {
-            if (e.code === 'Space') {
-                canvas.setCursor('default');
-                isPanning = false;
-                canvas.selection = true; // 恢复选择功能  
-                // 切换到移动工具
-                canvas.currentTool = 'move';
-            }
-        });
+        document.addEventListener('keyup', this._spaceUp.bind(this));
 
         // 监听鼠标按下事件  
         canvas.on('mouse:down', (opt) => {
-            if (isPanning || canvas.currentTool === 'pan') {
+            if (this.isPanning || canvas.currentTool === 'pan') {
                 const evt: any = opt.e;
+                this.lastPosX = evt.clientX;
+                this.lastPosY = evt.clientY;
                 canvas.setCursor('grabbing');
-                lastPosX = evt.clientX;
-                lastPosY = evt.clientY;
-                canvas.fire('canvas:startmove', { x: lastPosX, y: lastPosY })
+                canvas.fire('canvas:startmove', { x: this.lastPosX, y: this.lastPosY })
             }
         });
 
         // 监听鼠标移动事件  
         canvas.on('mouse:move', (opt) => {
             const evt: any = opt.e;
-            if ((isPanning || canvas.currentTool === 'pan') && evt.buttons === 1) {
-                canvas.setCursor('grabbing');
+            if ((this.isPanning || canvas.currentTool === 'pan') && evt.buttons === 1) {
                 const vpt = canvas.viewportTransform.slice() as TMat2D;
-                vpt[4] += evt.clientX - lastPosX;
-                vpt[5] += evt.clientY - lastPosY;
+                vpt[4] += evt.clientX - this.lastPosX;
+                vpt[5] += evt.clientY - this.lastPosY;
                 canvas.setViewportTransform(vpt);
-                lastPosX = evt.clientX;
-                lastPosY = evt.clientY;
+                this.lastPosX = evt.clientX;
+                this.lastPosY = evt.clientY;
+                canvas.setCursor('grabbing');
                 canvas.fire('canvas:moveing', { x: -vpt[4], y: -vpt[5] })
             }
         });
 
         // 监听鼠标释放事件  
         canvas.on('mouse:up', () => {
-            if (isPanning || canvas.currentTool === 'pan') {
+            if (this.isPanning || canvas.currentTool === 'pan') {
                 canvas.setCursor('grab');
-                canvas.fire('canvas:endmove', { x: lastPosX, y: lastPosY })
+                canvas.fire('canvas:endmove', { x: this.lastPosX, y: this.lastPosY })
             }
         });
 
-        // 缩放画布
-        // canvas.on('mouse:wheel', (opt) => {
-        //     const delta = opt.e.deltaY;
-        //     const zoom = canvas.getZoom();
-        //     const point: any = { x: opt.e.offsetX, y: opt.e.offsetY };
-
-        //     // 限制缩放范围
-        //     if (delta < 0 && zoom < 3) {
-        //         // 放大
-        //         canvas.zoomToPoint(point, zoom * 1.1);
-        //     } else if (delta > 0 && zoom > 0.1) {
-        //         // 缩小
-        //         canvas.zoomToPoint(point, zoom / 1.1);
-        //     }
-
-        //     opt.e.preventDefault();
-        //     opt.e.stopPropagation();
-        // })
+    }
+    // 按下空格键开始平移画布
+    protected _spaceDown(e: any) {
+        const { canvas } = this;
+        if (e.code === 'Space' && !this.isPanning) {
+            e.preventDefault();
+            this.isPanning = true;
+            canvas.selection = false; // 禁用选择功能 
+            canvas.currentTool = 'pan'; // 切换到平移工具
+            canvas.setCursor('grab');
+        }
+    }
+    // 释放空格键结束平移画布
+    protected _spaceUp(e: any) {
+        if (e.code === 'Space') {
+            const { canvas } = this;
+            canvas.setCursor('default');
+            this.isPanning = false;
+            canvas.selection = true; // 恢复选择功能  
+            // 切换到移动工具
+            canvas.currentTool = 'move';
+        }
     }
 
     // 滚轮操作
@@ -172,6 +161,11 @@ export class FabricControl implements CorePluginTemp {
             vpt[5] += delta * setp;
         }
         canvas.setViewportTransform(vpt);
+    }
+
+    dispose() {
+        document.removeEventListener('keydown', this._spaceDown.bind(this));
+        document.removeEventListener('keyup', this._spaceUp.bind(this));
     }
 
 }

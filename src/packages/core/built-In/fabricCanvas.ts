@@ -7,12 +7,17 @@ import type { TDataUrlOptions } from 'fabric';
 
 export class FabricCanvas extends Canvas {
 	[key: string]: any;
+	// 注册插件列表
+	pluginMap: string[] = []
 	// 当前光标操作工具 (move:移动, pan：平移, draw:绘制)
 	cursorTool: ICursorTool = 'move';
 	// 滚轮工具
 	wheelTool: IWheelTool = 'scroll';
 	constructor(el: string | HTMLCanvasElement, options: CanvasOptions) {
 		super(el, options)
+	}
+	override setCursor(value: CSSStyleDeclaration['cursor']): void {
+		this.upperCanvasEl && super.setCursor(value);
 	}
 	// 重写导出blob
 	override toBlob(options?: TDataUrlOptions) {
@@ -52,12 +57,16 @@ export class FabricCanvas extends Canvas {
 	}
 
 	use(plugin: any) {
-		const { pluginName } = plugin
-		if (pluginName && this[pluginName.toLowerCase()]) {
+		const { pluginName } = plugin;
+		if (!pluginName) {
+			throw new Error('pluginName is required');
+		} else if (this[pluginName.toLowerCase()]) {
 			throw new Error(`${pluginName} is exist`);
 		}
+		const pluginKey = pluginName.toLowerCase();
+		// 实例化插件
 		const pluginInstance = new (plugin as CorePluginClass)(this)
-		// 安装插件事件
+		// 绑定快捷键
 		pluginInstance.hotkeys.forEach((item: IHotkey) => {
 			const { hotkey, handler } = item
 			if (handler) {
@@ -68,8 +77,19 @@ export class FabricCanvas extends Canvas {
 			}
 		})
 		// 注册到实例
-		if (pluginName) {
-			this[pluginName.toLowerCase()] = pluginInstance
-		}
+		this[pluginKey] = pluginInstance
+		// 注册到插件列表
+		this.pluginMap.push(pluginKey)
+	}
+	override async dispose(): Promise<boolean> {
+		return super.dispose().then((res) => {
+			// 移除所有事件
+			hotkeys.unbind()
+			// 销毁所有插件
+			this.pluginMap.forEach((key) => {
+				this[key].dispose && this[key].dispose()
+			})
+			return res
+		})
 	}
 }

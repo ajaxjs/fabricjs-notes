@@ -9,6 +9,7 @@ import { FabricCanvas } from './built-In/fabricCanvas';
 import { FabricFrame } from './built-In/fabricFrame';
 import { FabricHotkey } from './built-In/fabricHotkey';
 import { FabricControl } from './built-In/fabricControl';
+import { FabricHistory } from './built-In/fabricHistory';
 //import { initAligningGuidelines } from './built-In/Guideline';
 
 class FabricCore {
@@ -63,6 +64,8 @@ class FabricCore {
         this.canvas.use(FabricHotkey);
         // 基础控制插件
         this.canvas.use(FabricControl);
+        // 历史记录插件
+        this.canvas.use(FabricHistory);
 
         // 安装插件
         this.plubinMap.forEach(([plugin, options]) => this._pluginInstaller(plugin, options))
@@ -100,17 +103,33 @@ class FabricCore {
             this[item] = pluginInstance[item].bind(pluginInstance)
         })
     }
-    // 销毁canvas
+    protected _destroy() {
+        this.canvas = null;
+        this._wrapper?.querySelectorAll('canvas').forEach((item) => item.remove());
+        this._wrapper = null;
+        this._canvasDom = null;
+        hotkeys.unbind();
+    }
     destroy() {
         if (this.canvas) {
-            console.log('destroy canvas');
             this.canvas.destroy();
-            this.canvas = null;
-            this._wrapper?.querySelectorAll('canvas').forEach((item) => item.remove());
-            this._wrapper = null;
-            this._canvasDom = null;
-            hotkeys.unbind();
+            this._destroy()
         }
+    }
+    // 销毁canvas
+    dispose() {
+        return new Promise((resolve, reject) => {
+            if (this.canvas) {
+                this.canvas.dispose().then(() => {
+                    this._destroy()
+                    resolve(true)
+                }).catch((err) => {
+                    reject(err)
+                })
+            } else {
+                resolve(true)
+            }
+        })
     }
 }
 

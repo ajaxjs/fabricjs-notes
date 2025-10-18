@@ -1,8 +1,9 @@
+import type { IHotkey, CorePluginTemp } from '../interface'
+import type { FabricCanvas } from './fabricCanvas'
 import { Disposable } from '../utils/lifecycle'
 import { DesignUnitMode } from '../configs/background'
 import { Point, Rect as fabricRect, FabricObject } from 'fabric'
 import type { TAxis, TPointerEventInfo, TPointerEvent } from 'fabric'
-import type { FabricCanvas } from './fabricCanvas'
 import { px2mm } from '../utils/image'
 import { ElementNames } from '../types/elements'
 import { ReferenceLine } from '../extension/object/ReferenceLine'
@@ -72,7 +73,10 @@ export interface RulerOptions {
 
 export type HighlightRect = { skip?: TAxis } & Rect
 
-export class FabricRuler extends Disposable {
+export class FabricRuler implements CorePluginTemp {
+  static pluginName: string = 'Ruler'
+  hotkeys: IHotkey[] = [];
+
   private canvasEvents
   public lastCursor: string
   public workSpaceDraw?: fabricRect
@@ -88,7 +92,6 @@ export class FabricRuler extends Disposable {
   private canvas: FabricCanvas
 
   constructor(canvas: FabricCanvas, options?: Partial<RulerOptions>) {
-    super()
     this.canvas = canvas
     this.lastCursor = canvas.defaultCursor
     this.unitMode = 1 // 默认单位模式
@@ -603,7 +606,6 @@ export class FabricRuler extends Disposable {
   }
 
   public dispose(): void {
-    super.dispose()
     this.enabled = false
   }
 }
