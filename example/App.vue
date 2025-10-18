@@ -6,13 +6,62 @@ import { Editor } from '@/packages/editor'
 import { random } from 'es-toolkit'
 import { FabricCanvas } from '@/packages/core/built-In/fabricCanvas'
 
-import { Rect, Ellipse, Triangle } from 'fabric'
+import { Rect, Ellipse, Triangle, IText, Path, FabricText } from 'fabric'
+import { ArcText } from '@/packages/core/extension/object/ArcText'
 
 let canvas: FabricCanvas | null = null;
+
+// const pathObject = new Path('M 0 0 A 20 20 0 0 1 200 0', {
+// 	fill: 'transparent',
+// 	stroke: 'grey',
+// 	strokeWidth: 1
+// });
+const makePath = (textObj: FabricText) => {
+	const textWidth = textObj.calcTextWidth(); // 计算文字总宽度  
+	const radius = textWidth / Math.PI; // 根据文字宽度计算半径  
+
+	// 创建足够长的弧线  
+	const pathString = `M ${-radius} 0 A ${radius} ${radius} 0 0 1 ${radius} 0`;
+	return new Path(pathString, {
+		fill: 'transparent',
+		stroke: 'grey',
+		strokeWidth: 1
+	});
+};
 onMounted(() => {
 	canvas = getCanvas()
 	console.log(canvas);
+	if (canvas) {
 
+		const arcText = new IText('2026年12生肖运程', {
+			left: 100,
+			top: 100,
+			fill: '#ff0000',
+			lineHeight: 1.5,
+			fontSize: 40,
+			//charSpacing: -50,
+			//editable: true,
+		})
+
+		const pathObject = makePath(arcText);
+
+		arcText.set('path', pathObject);
+		arcText.set('pathStartOffset', 0);
+		setTimeout(() => {
+			console.log(arcText.__charBounds[0]);
+		}, 0);
+
+		arcText.on('editing:entered', () => {
+			arcText.set('path', null)
+			console.log('editing:entered');
+		})
+		arcText.on('editing:exited', () => {
+			arcText.set('path', pathObject);
+			console.log('editing:exited');
+		})
+
+		canvas.add(arcText)
+	}
 })
 
 const editorRef = ref()
@@ -106,6 +155,15 @@ const exportMenu = [
 	{ label: 'Export as PNG', onClick: exportPng },
 	{ label: 'Export as SVG', onClick: exportSvg },
 ]
+
+function importJson() {
+	const json = window.prompt('Are you sure you want to import?')
+	if (!json) {
+		return
+	}
+	console.log(json);
+
+}
 </script>
 
 <template>
@@ -121,6 +179,7 @@ const exportMenu = [
 				{{ currentTool }}
 			</Button>
 			<div class="flex-1"></div>
+			<Button variant="outline" @click="importJson">Import</Button>
 			<DropdownMenu :items="exportMenu">
 				<Button variant="outline">Export</Button>
 			</DropdownMenu>

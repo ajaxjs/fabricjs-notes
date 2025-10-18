@@ -1,7 +1,7 @@
 /**
  * 基础控制插件
  */
-import hotkeys from 'hotkeys-js';
+import { FabricObject } from 'fabric'
 import type { CorePluginTemp, IHotkey } from '../interface'
 import type { FabricCanvas } from './fabricCanvas'
 import type { TMat2D, Point } from 'fabric'
@@ -12,6 +12,36 @@ export class FabricControl implements CorePluginTemp {
     hotkeys: IHotkey[] = [];
     constructor(canvas: FabricCanvas) {
         this.canvas = canvas;
+
+        // 控制对象是否缓存渲染结果，设为false可提高动画性能但会增加渲染开销
+        FabricObject.ownDefaults.objectCaching = false
+        // 设置选中对象边框的颜色
+        FabricObject.ownDefaults.borderColor = 'blue'
+        // 设置选中对象控制点的填充颜色
+        FabricObject.ownDefaults.cornerColor = 'white'
+        // 设置选中对象控制点的描边颜色
+        FabricObject.ownDefaults.cornerStrokeColor = '#c0c0c0'
+        // 移动对象时边框的不透明度，1表示完全不透明
+        FabricObject.ownDefaults.borderOpacityWhenMoving = 1
+        // 边框粗细相对于对象大小的缩放因子（默认值为1）
+        // FabricObject.ownDefaults.borderScaleFactor = 1
+        // 控制点的大小（像素）
+        FabricObject.ownDefaults.cornerSize = 8
+        // 控制点的形状，'rect'表示矩形，可选'circle'（默认值为'rect'）
+        // FabricObject.ownDefaults.cornerStyle = 'rect'
+        // 缩放操作是否以对象中心为原点，false表示以鼠标位置为原点（默认值为false）
+        // FabricObject.ownDefaults.centeredScaling = false
+        // 旋转操作是否以对象中心为原点，true表示以中心为原点（默认值为true）
+        // FabricObject.ownDefaults.centeredRotation = true
+        // 控制点是否透明，false表示不透明
+        FabricObject.ownDefaults.transparentCorners = false
+        // 旋转控制点距离对象的偏移量（像素），控制旋转点与对象的距离
+        // FabricObject.ownDefaults.rotatingPointOffset = 1
+        // 是否锁定等比例缩放，设为true时只能按比例缩放对象
+        // FabricObject.ownDefaults.lockUniScaling = true
+        // 是否显示旋转控制点，设为false时对象将没有旋转控制点
+        // FabricObject.ownDefaults.hasRotatingPoint = false
+
         // 平移画布
         this._bindPanCanvas();
         // 滚轮操作
@@ -103,14 +133,13 @@ export class FabricControl implements CorePluginTemp {
     // 滚轮操作
     protected _bindWheel() {
         const { canvas } = this;
-
         canvas.on('mouse:wheel', (opt) => {
             const delta = opt.e.deltaY;
-            const direction = opt.e.shiftKey ? 'x' : 'y';
             const point: any = { x: opt.e.offsetX, y: opt.e.offsetY };
-            if (opt.e.ctrlKey) {
+            if (opt.e.altKey) {
                 this.zoom(delta, point);
             } else {
+                const direction = opt.e.shiftKey || opt.e.ctrlKey ? 'x' : 'y';
                 this.pan(-delta, direction);
             }
             opt.e.preventDefault();
