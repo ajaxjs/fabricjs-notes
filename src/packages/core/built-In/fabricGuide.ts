@@ -2,7 +2,7 @@
 import { StaticCanvas, Canvas, ActiveSelection, FabricObject, Group, Point } from 'fabric'
 import type { IHotkey, CorePluginTemp } from '../interface'
 import type { FabricCanvas } from './fabricCanvas'
-import { check } from '../utils/check'
+import { isActiveSelection, isCollection, isNativeGroup, isCircle } from '../utils/check'
 
 type VerticalLineCoords = {
   x: number
@@ -75,7 +75,7 @@ export class FabricGuide implements CorePluginTemp {
 
   private objectMoving({ target }: any) {
     this.clearStretLine()
-    if (check.isCircle(target)) {
+    if (isCircle(target)) {
       return false
     }
     const transform = this.canvas._currentTransform
@@ -102,12 +102,12 @@ export class FabricGuide implements CorePluginTemp {
           return false
         }
         // 元素为组，把组内元素加入，同时排除组本身
-        if (check.isActiveSelection(obj)) {
+        if (isActiveSelection(obj)) {
           add(obj)
           return false
         }
         // 元素为组，把组内元素加入，同时排除组本身
-        if (check.isCollection(obj) && target.group && obj === target.group) {
+        if (isCollection(obj) && target.group && obj === target.group) {
           add(obj)
           return false
         }
@@ -116,21 +116,21 @@ export class FabricGuide implements CorePluginTemp {
       canvasObjects.push(...objects as FabricObject[])
     }
 
-    if (check.isActiveSelection(target)) {
+    if (isActiveSelection(target)) {
       const needAddParent = new Set<Group | Canvas | StaticCanvas>()
       target.forEachObject((obj) => {
         const parent = obj.group ? obj.group : this.canvas
         if (parent) needAddParent.add(parent as Group)
       })
       needAddParent.forEach((parent) => {
-        if (check.isNativeGroup(parent)) {
+        if (isNativeGroup(parent)) {
           canvasObjects.push(parent)
         }
         add(parent)
       })
     } else {
       const parent = target.group ? target.group : this.canvas
-      if (check.isNativeGroup(parent)) {
+      if (isNativeGroup(parent)) {
         canvasObjects.push(parent)
       }
       add(parent)

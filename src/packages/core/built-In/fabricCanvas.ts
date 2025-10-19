@@ -1,8 +1,9 @@
 import hotkeys from 'hotkeys-js';
-import { Canvas } from 'fabric';
-import type { CanvasOptions, TSVGExportOptions, TSVGReviver } from 'fabric';
+import { Canvas, FabricObject } from 'fabric';
+import type { CanvasOptions, TSVGExportOptions, TSVGReviver, FabricObjectProps, SerializedObjectProps, ObjectEvents } from 'fabric';
 import type { CorePluginClass } from '../interface/core'
 import type { IHotkey, IWheelTool, ICursorTool } from '../interface';
+import { isCollection } from '../utils/check'
 import type { TDataUrlOptions } from 'fabric';
 
 export class FabricCanvas extends Canvas {
@@ -15,8 +16,32 @@ export class FabricCanvas extends Canvas {
 	wheelTool: IWheelTool = 'scroll';
 	constructor(el: string | HTMLCanvasElement, options: CanvasOptions) {
 		super(el, options)
-		// hotkeys('*',(e)=>console.log(e))
+		// 导入自定义属性
+		FabricObject.customProperties = ['index', 'selectable', 'evented']
 	}
+	// 重写添加对象
+	override add(...objects: FabricObject[]): number {
+		return super.add(...this.resetObject(objects))
+	}
+	// 重写插入对象
+	override insertAt(index: number, ...object: FabricObject[]): number {
+		return super.insertAt(index, ...this.resetObject(object))
+	}
+	private resetObject(objects: FabricObject[]) {
+		return objects.map((item) => {
+			// 元素索引从0开始
+			if (!item.hasOwnProperty('index')) {
+				const index = this._objects.length ? Math.max(...this._objects.map((vo) => vo.index + 1)) : 0
+				item.set({ index })
+			}
+			// 递归处理集合对象
+			if (isCollection(item)) {
+				this.resetObject(item._objects)
+			}
+			return item
+		})
+	}
+	// 重写设置光标
 	override setCursor(value: CSSStyleDeclaration['cursor']): void {
 		this.upperCanvasEl && super.setCursor(value);
 	}
@@ -32,7 +57,7 @@ export class FabricCanvas extends Canvas {
 		}
 		return super.toBlob()
 	}
-
+	// 重写导出svg
 	override toSVG(options?: TSVGExportOptions, reviver?: TSVGReviver): string {
 		if (this.frame) {
 			const { width, height, left, top } = this.frame;
@@ -56,7 +81,7 @@ export class FabricCanvas extends Canvas {
 		}
 		return super.toSVG(options, reviver);
 	}
-
+	// 注册插件
 	use(plugin: any) {
 		const { pluginName } = plugin;
 		if (!pluginName) {
@@ -82,6 +107,7 @@ export class FabricCanvas extends Canvas {
 		// 注册到插件列表
 		this.pluginMap.push(pluginKey)
 	}
+	// 重写销毁canvas
 	override async dispose(): Promise<boolean> {
 		return super.dispose().then((res) => {
 			// 移除所有事件
