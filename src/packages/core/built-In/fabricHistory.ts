@@ -2,16 +2,24 @@ import type { CorePluginTemp, IHotkey } from '../interface'
 import type { FabricCanvas } from './fabricCanvas'
 import { debounce } from 'es-toolkit'
 
+type historyEvent = {
+    action: string;
+    target?: any;
+}
+type historyItem = historyEvent & {
+    state: string
+}
+
 export class FabricHistory implements CorePluginTemp {
     static pluginName = 'history'
     hotkeys: IHotkey[] = [
-        { hotkey: 'ctrl+z', label: '撤销', handler: this.undo },
-        { hotkey: 'ctrl+y', label: '重做', handler: this.redo },
+        { hotkey: 'ctrl+z,command+z', label: '撤销', handler: this.undo },
+        { hotkey: 'ctrl+y,command+y', label: '重做', handler: this.redo },
     ]
     canvas: FabricCanvas;
 
     // 历史记录栈
-    private historyStack: string[] = [];
+    private historyStack: historyItem[] = [];
     // 当前历史记录位置
     private currentIndex: number = -1;
     // 历史记录最大数量
@@ -23,35 +31,41 @@ export class FabricHistory implements CorePluginTemp {
 
     constructor(canvas: FabricCanvas) {
         this.canvas = canvas;
+        this._initHistory();
         this._canvasChange();
+    }
+
+    private _initHistory() {
+        this.saveState({action:'init'})
     }
 
     // 监听画布变化事件
     protected _canvasChange() {
         const { canvas } = this;
-        this.changeHandler = debounce((/*e: any*/) => {
-            // 待做：
-            // 1. 记录操作事件类型，如add/remove/drag（modified的e.action）等，方便后期显示
-            //console.log('e', e);
-            this.saveState.call(this)
+        this.changeHandler = debounce((e: any) => {
+            this.saveState.call(this,e)
         }, 300)
         // 对象修改事件
         canvas.on('object:modified', this.changeHandler);
         // 对象添加事件
-        canvas.on('object:added', this.changeHandler);
+        canvas.on('object:added', (e)=>this.changeHandler({...e,action:'add'}));
         // 对象移除事件
-        canvas.on('object:removed', this.changeHandler);
+        canvas.on('object:removed', e=>this.changeHandler({...e,action:'remove'}));
     }
 
-    private saveState() {
-        //console.log('---saveState', e);
+    private saveState({action,target}:historyEvent) {
         if (this.isHistoryAction) {
             this.isHistoryAction = false;
             return;
         }
         const state = this.canvas.toJSON();
+        const item: historyItem = {
+            action,
+            target,
+            state: JSON.stringify(state)
+        };
 
-        this.historyStack.push(JSON.stringify(state));
+        this.historyStack.push(item);
         this.currentIndex++;
         // 保持历史记录数量不超过最大限制
         if (this.historyStack.length > this.maxHistorySize) {
@@ -62,13 +76,13 @@ export class FabricHistory implements CorePluginTemp {
 
     // 定位到指定历史记录索引
     locaTo(index: number) {
-        const state: string = this.historyStack[index] || '';
-        if (!state) return;
+        const item: historyItem|undefined = this.historyStack[index];
+        if (!item) return;
 
         //console.log('+++isHistoryAction:true');
         this.isHistoryAction = true;
         this.currentIndex = index;
-        this.canvas.loadFromJSON(state).then((canvas) => {
+        this.canvas.loadFromJSON(item.state).then((canvas) => {
             canvas.requestRenderAll()
         });
     }
@@ -101,7 +115,7 @@ export class FabricHistory implements CorePluginTemp {
     public clear() {
         this.historyStack = [];
         this.currentIndex = -1;
-        this.saveState();
+        this._initHistory();
     }
 
     // 获取历史记录信息

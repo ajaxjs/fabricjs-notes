@@ -15,6 +15,7 @@ export class FabricCanvas extends Canvas {
 	wheelTool: IWheelTool = 'scroll';
 	constructor(el: string | HTMLCanvasElement, options: CanvasOptions) {
 		super(el, options)
+		// hotkeys('*',(e)=>console.log(e))
 	}
 	override setCursor(value: CSSStyleDeclaration['cursor']): void {
 		this.upperCanvasEl && super.setCursor(value);

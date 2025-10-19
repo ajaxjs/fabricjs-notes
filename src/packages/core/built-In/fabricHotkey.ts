@@ -12,7 +12,7 @@ export class FabricHotkey implements CorePluginTemp {
     hotkeys: IHotkey[] = [
         { hotkey: 'ctrl+g', label: '组合对象', handler: this.group },
         { hotkey: 'ctrl+shift+g', label: '取消组合', handler: this.ungroup },
-        { hotkey: 'delete', label: '删除选中', handler: this.delete },
+        { hotkey: 'delete,backspace', label: '删除选中', handler: this.delete },
     ];
     constructor(canvas: FabricCanvas) {
         this.canvas = canvas;
