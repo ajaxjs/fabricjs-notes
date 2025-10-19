@@ -9,7 +9,7 @@ import { FabricCanvas } from '@/packages/core/built-In/fabricCanvas'
 import { Rect, Ellipse, Triangle, IText, Path, FabricText } from 'fabric'
 // import { ArcText } from '@/packages/core/extension/object/ArcText'
 
-let canvas: FabricCanvas | null = null;
+let icanvas: FabricCanvas | null = null;
 
 // const pathObject = new Path('M 0 0 A 20 20 0 0 1 200 0', {
 // 	fill: 'transparent',
@@ -123,22 +123,27 @@ const exportMenu = [
 
 function importJson() {
 	const json = window.prompt('Are you sure you want to import?')
-	if (!json) {
+	if (!json || !icanvas) {
 		return
 	}
-	console.log(json);
-
+	//console.log(json);
+	icanvas.loadFromJSON(json).then((canvas) => canvas.requestRenderAll());
 }
 function onEditorMounted(canvas: FabricCanvas) {
+	icanvas = canvas
 	console.log('-onEditorMounted', canvas);
+	//testArcText(canvas)
 	// 初始化canvas尺寸
 	canvas.frame.setFrame({
-        width: 400,
-        height: 600,
-        fill: '#ffffff',
-    })
-    // canvas.backgroundColor = '#f0f0f0'
-	
+		width: 400,
+		height: 600,
+		fill: '#ffffff',
+	})
+	// canvas.backgroundColor = '#f0f0f0'
+}
+
+function testArcText(canvas: FabricCanvas) {
+
 	const arcText = new IText('HelloWorld!', {
 		left: 100,
 		top: 100,
@@ -168,6 +173,7 @@ function onEditorMounted(canvas: FabricCanvas) {
 
 	canvas.add(arcText)
 }
+
 </script>
 
 <template>
