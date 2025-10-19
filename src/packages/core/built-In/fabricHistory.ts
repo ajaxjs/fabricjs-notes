@@ -50,7 +50,7 @@ export class FabricHistory implements CorePluginTemp {
         // 对象添加事件
         canvas.on('object:added', (e)=>this.changeHandler({...e,action:'add'}));
         // 对象移除事件
-        canvas.on('object:removed', e=>this.changeHandler({...e,action:'remove'}));
+        canvas.on('object:removed', (e)=>this.changeHandler({...e,action:'remove'}));
     }
 
     private saveState({action,target}:historyEvent) {
@@ -58,6 +58,12 @@ export class FabricHistory implements CorePluginTemp {
             this.isHistoryAction = false;
             return;
         }
+        // 删除currentIndex之后的记录
+        const historLen = this.historyStack.length
+        if(this.currentIndex < historLen - 1){
+            this.historyStack.splice(this.currentIndex,historLen)
+        }
+        
         const state = this.canvas.toJSON();
         const item: historyItem = {
             action,
@@ -130,9 +136,10 @@ export class FabricHistory implements CorePluginTemp {
 
     // 销毁插件
     public dispose() {
-        //const { canvas } = this;
+        const { canvas } = this;
 
         // 移除所有事件监听器
+        canvas.off()
         //canvas.off('object:modified', this.changeHandler);
         //canvas.off('object:added', this.changeHandler);
         //canvas.off('object:removed', this.changeHandler);
