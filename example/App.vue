@@ -2,14 +2,22 @@
 import { onMounted, ref, nextTick } from 'vue'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu } from '@/components/qxt-vue/dropdown-menu'
+import {
+	ButtonGroup
+} from '@/components/ui/button-group'
+
+
 import { Editor } from '@/packages/editor'
 import { random } from 'es-toolkit'
 import { FabricCanvas } from '@/packages/core/built-In/fabricCanvas'
 
 import { Rect, Ellipse, Triangle, IText, Path, FabricText, FabricImage } from 'fabric'
+import { PencilBrush, CircleBrush, SprayBrush, PatternBrush } from 'fabric'
 // import { ArcText } from '@/packages/core/extension/object/ArcText'
 
 let icanvas: FabricCanvas | null = null;
+
+
 
 // const pathObject = new Path('M 0 0 A 20 20 0 0 1 200 0', {
 // 	fill: 'transparent',
@@ -103,18 +111,7 @@ const exportSvg = () => {
 	})
 	console.log(svg);
 }
-// 切换平移工具
-const currentTool = ref('move')
-const togglePan = () => {
-	const canvas = getCanvas()
-	const isPanning = canvas.currentTool === 'pan'
-	if (isPanning) {
-		currentTool.value = 'move'
-	} else {
-		currentTool.value = 'pan'
-	}
-	canvas.currentTool = currentTool.value
-}
+
 const exportMenu = [
 	{ label: 'Export as JSON', onClick: exportJson },
 	{ label: 'Export as PNG', onClick: exportPng },
@@ -174,29 +171,6 @@ function testArcText(canvas: FabricCanvas) {
 	canvas.add(arcText)
 }
 
-function setImgMaxSize(img: HTMLImageElement, maxWidth: number, maxHeight: number) {
-	// 获取原始图片的宽高
-	const originalWidth = img.width;
-	const originalHeight = img.height;
-
-	// 计算宽高缩放比例（如果原始尺寸小于最大限制，比例会 >=1，不缩放）
-	const widthRatio = maxWidth / originalWidth;
-	const heightRatio = maxHeight / originalHeight;
-
-	// 取最小的缩放比例（确保宽和高都不超过最大限制）
-	const scale = Math.min(widthRatio, heightRatio);
-
-	// 计算新的宽高（只在需要缩小时生效，放大不处理）
-	const newWidth = originalWidth * scale;
-	const newHeight = originalHeight * scale;
-
-	// 修改图片尺寸
-	img.width = newWidth;
-	img.height = newHeight;
-
-	// 返回处理后的图片
-	return img;
-}
 function addImage(e: any) {
 	const canvas = getCanvas()
 	const file = e.target.files[0]
@@ -238,6 +212,25 @@ function addImage(e: any) {
 	}
 	reader.readAsDataURL(file)
 }
+
+
+// 切换工具
+const brashTools = [
+	{ label: '铅笔', value: PencilBrush },
+	{ label: '圆刷', value: CircleBrush },
+	{ label: '喷刷', value: SprayBrush },
+	{ label: '图案刷', value: PatternBrush }
+]
+const activeTool = ref('move')
+const setActiveTool = (name: string, brash?: any) => {
+	const canvas = getCanvas()
+	activeTool.value = name
+	if (brash) {
+		canvas.setActiveTool(name, new brash.selected.value(canvas))
+	}else{
+		canvas.activeTool = name
+	}
+}
 </script>
 
 <template>
@@ -251,10 +244,7 @@ function addImage(e: any) {
 			<Button variant="outline" @click="addShape({ left: 0, top: 0 })">Add 0</Button>
 			<Button variant="outline" @click="setZoom(0.2)">Zoom+</Button>
 			<Button variant="outline" @click="setZoom(-0.2)">Zoom-</Button>
-			<Button variant="outline" :class="currentTool === 'pan' ? 'border-blue-500 text-blue-500' : ''"
-				@click="togglePan()">
-				{{ currentTool }}
-			</Button>
+
 			<div class="flex-1"></div>
 			<Button variant="outline" @click="importJson">Import</Button>
 			<DropdownMenu :items="exportMenu">
@@ -263,6 +253,17 @@ function addImage(e: any) {
 			<!--<Button variant="outline" @click="destroyEditor">Destroy</Button>-->
 		</div>
 		<Editor ref="editorRef" class="flex-1" @mounted="onEditorMounted" />
+		<div class="flex gap-2 pt-2">
+			<ButtonGroup>
+				<Button variant="outline" :class="{ 'text-blue-500': activeTool === 'move' }"
+					@click="setActiveTool('move')">选择</Button>
+				<Button variant="outline" :class="{ 'text-blue-500': activeTool === 'pan' }"
+					@click="setActiveTool('pan')">移动</Button>
+				<DropdownMenu :items="brashTools" @selected="(brash) => setActiveTool('brash', brash)">
+					<Button variant="outline" :class="{ 'text-blue-500': activeTool === 'brash' }">绘制</Button>
+				</DropdownMenu>
+			</ButtonGroup>
+		</div>
 	</div>
 </template>
 

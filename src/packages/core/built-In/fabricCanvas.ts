@@ -10,14 +10,44 @@ export class FabricCanvas extends Canvas {
 	[key: string]: any;
 	// 注册插件列表
 	pluginMap: string[] = []
-	// 当前光标操作工具 (move:移动, pan：平移, draw:绘制)
-	cursorTool: ICursorTool = 'move';
+	// 当前光标操作工具 (move:移动, pan：平移, brash:笔刷)
+	protected _activeTool: ICursorTool = 'move';
 	// 滚轮工具
 	wheelTool: IWheelTool = 'scroll';
 	constructor(el: string | HTMLCanvasElement, options: CanvasOptions) {
 		super(el, options)
 		// 导入自定义属性
 		FabricObject.customProperties = ['index', 'selectable', 'evented']
+	}
+	get activeTool() {
+		return this._activeTool
+	}
+	set activeTool(name: ICursorTool) {
+		this._activeTool = name;
+		if (this.isDrawingMode) {
+			this.isDrawingMode = false;
+			this.freeDrawingBrush = undefined;
+		}
+	}
+	setActiveTool(name: ICursorTool, tool?: any) {
+		// 普通实现，待优化
+		if (name === 'brash') {
+			if (this.freeDrawingBrush === tool) return
+
+			//this.setCursor('crosshair')
+			// 开启绘制模式
+			this.isDrawingMode = true;
+			// 笔刷实例
+			this.freeDrawingBrush = tool;
+			// 配置笔刷属性  
+			this.freeDrawingBrush!.color = 'red';
+			this.freeDrawingBrush!.width = 5;
+		} else {
+			this.isDrawingMode = false;
+			this.freeDrawingBrush = undefined;
+			//this.setCursor('default')
+		}
+		this._activeTool = name
 	}
 	// 重写添加对象
 	override add(...objects: FabricObject[]): number {

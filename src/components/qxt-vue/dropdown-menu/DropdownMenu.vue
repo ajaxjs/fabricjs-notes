@@ -10,10 +10,13 @@ import DropdownMenuGroup from './DropdownMenuGroup.vue'
 
 
 
-import type { TDropdownMenu } from './type'
+import type { TDropdownMenu, TSelectedEvent } from './type'
 
 const { items } = defineProps<TDropdownMenu>()
-
+const emits = defineEmits(['selected'])
+function onSelectedHandler(e: TSelectedEvent) {
+    emits('selected', e)
+}
 
 </script>
 
@@ -30,7 +33,7 @@ const { items } = defineProps<TDropdownMenu>()
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
             </template>
-            <DropdownMenuGroup :items="items"></DropdownMenuGroup>
+            <DropdownMenuGroup :items="items" @selected="onSelectedHandler"></DropdownMenuGroup>
         </DropdownMenuContent>
     </DropdownMenu>
 </template>

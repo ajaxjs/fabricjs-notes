@@ -5,11 +5,17 @@ import {
     DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import DropdownMenuItem from './DropdownMenuItem.vue'
-import type { TDropdownMenuItems } from './type'
+import type { TDropdownMenuItems, TSelectedEvent } from './type'
+
+const emits = defineEmits(['selected'])
+function onSelectedHandler(e: TSelectedEvent) {
+    emits('selected', e)
+}
 
 const { items } = defineProps<{
     items: TDropdownMenuItems | TDropdownMenuItems[]
 }>()
+
 const itemsGroup = computed(() => {
     const group: TDropdownMenuItems[] = [];
     let _temp: TDropdownMenuItems = [];
@@ -26,12 +32,13 @@ const itemsGroup = computed(() => {
     })
     return [items]
 })
+
 </script>
 
 <template>
     <template v-for="(group, i) in itemsGroup" :key="i">
         <DropdownMenuGroup>
-            <DropdownMenuItem v-for="(item, i) in group" :key="i" v-bind="item" />
+            <DropdownMenuItem v-for="(item, i) in group" :key="i" v-bind="item" @selected="onSelectedHandler" />
         </DropdownMenuGroup>
         <DropdownMenuSeparator v-if="i < itemsGroup.length - 1" />
     </template>

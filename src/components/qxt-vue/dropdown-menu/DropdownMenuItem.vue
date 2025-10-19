@@ -5,15 +5,24 @@ import {
 } from "@/components/ui/dropdown-menu"
 import DropdownMenuSub from "./DropdownMenuSub.vue"
 
-import type { TDropdownMenuItem } from "./type"
+import type { TDropdownMenuItem, TSelectedEvent } from "./type"
+import { useAttrs } from "vue";
+
+const emits = defineEmits(['selected'])
 
 const props = defineProps<TDropdownMenuItem>()
+const attrs = useAttrs()
 
 function onClickHandler(e: Event) {
     if (props.disabled) {
         return
     }
-    props.onClick?.(e)
+    // 点击事件数据
+    const event = e as TSelectedEvent
+    event.selected = { ...props, ...attrs }
+
+    props.onClick?.(event)
+    emits('selected', event)
 }
 
 </script>

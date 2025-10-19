@@ -13,3 +13,7 @@ export type TDropdownMenu = {
     label?: string;
     items: TDropdownMenuItems | TDropdownMenuItems[];
 }
+
+export type TSelectedEvent = Event & {
+    selected: TDropdownMenuItem;
+}

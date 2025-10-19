@@ -30,4 +30,4 @@ export interface IFrameOptions {
 // 滚轮工具
 export type IWheelTool = 'zoom' | 'scroll';
 // 光标工具
-export type ICursorTool = 'move' | 'pan' | 'draw';
+export type ICursorTool = 'move' | 'pan' | 'brash';

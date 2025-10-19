@@ -63,7 +63,7 @@ export class FabricControl implements CorePluginTemp {
 
         // 监听鼠标按下事件  
         canvas.on('mouse:down', (opt) => {
-            if (this.isPanning || canvas.currentTool === 'pan') {
+            if (this.isPanning || canvas.activeTool === 'pan') {
                 const evt: any = opt.e;
                 this.lastPosX = evt.clientX;
                 this.lastPosY = evt.clientY;
@@ -75,7 +75,7 @@ export class FabricControl implements CorePluginTemp {
         // 监听鼠标移动事件  
         canvas.on('mouse:move', (opt) => {
             const evt: any = opt.e;
-            if ((this.isPanning || canvas.currentTool === 'pan') && evt.buttons === 1) {
+            if ((this.isPanning || canvas.activeTool === 'pan') && evt.buttons === 1) {
                 const vpt = canvas.viewportTransform.slice() as TMat2D;
                 vpt[4] += evt.clientX - this.lastPosX;
                 vpt[5] += evt.clientY - this.lastPosY;
@@ -89,7 +89,7 @@ export class FabricControl implements CorePluginTemp {
 
         // 监听鼠标释放事件  
         canvas.on('mouse:up', () => {
-            if (this.isPanning || canvas.currentTool === 'pan') {
+            if (this.isPanning || canvas.activeTool === 'pan') {
                 canvas.setCursor('grab');
                 canvas.fire('canvas:endmove', { x: this.lastPosX, y: this.lastPosY })
             }
@@ -103,7 +103,7 @@ export class FabricControl implements CorePluginTemp {
             e.preventDefault();
             this.isPanning = true;
             canvas.selection = false; // 禁用选择功能 
-            canvas.currentTool = 'pan'; // 切换到平移工具
+            canvas.activeTool = 'pan'; // 切换到平移工具
             canvas.setCursor('grab');
         }
     }
@@ -115,7 +115,7 @@ export class FabricControl implements CorePluginTemp {
             this.isPanning = false;
             canvas.selection = true; // 恢复选择功能  
             // 切换到移动工具
-            canvas.currentTool = 'move';
+            canvas.activeTool = 'move';
         }
     }
 
