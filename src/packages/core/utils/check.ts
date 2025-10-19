@@ -1,4 +1,4 @@
-import { FabricObject, ActiveSelection, Gradient, Pattern, Text, Group, Canvas, Circle } from 'fabric'
+import { FabricObject, ActiveSelection, Gradient, Pattern, Text, Group, Canvas, Circle, FabricImage } from 'fabric'
 import { Group as NativeGroup } from 'fabric'
 
 
@@ -8,6 +8,10 @@ export const isActiveSelection = (thing: unknown): thing is ActiveSelection => {
 
 export const isCircle = (thing: unknown): thing is Circle => {
   return thing instanceof Circle
+}
+
+export const isImage = (thing: unknown): thing is FabricImage => {
+  return thing instanceof FabricImage
 }
   
 export const isGroup = (thing?: unknown): thing is Group => {

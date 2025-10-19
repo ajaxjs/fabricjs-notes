@@ -1,9 +1,9 @@
 import hotkeys from 'hotkeys-js';
 import { Canvas, FabricObject } from 'fabric';
-import type { CanvasOptions, TSVGExportOptions, TSVGReviver, FabricObjectProps, SerializedObjectProps, ObjectEvents } from 'fabric';
+import type { CanvasOptions, TSVGExportOptions, TSVGReviver } from 'fabric';
 import type { CorePluginClass } from '../interface/core'
 import type { IHotkey, IWheelTool, ICursorTool } from '../interface';
-import { isCollection } from '../utils/check'
+import { isCollection, isImage } from '../utils/check'
 import type { TDataUrlOptions } from 'fabric';
 
 export class FabricCanvas extends Canvas {

@@ -53,6 +53,7 @@ export class FabricHistory implements CorePluginTemp {
         canvas.on('object:removed', (e)=>this.changeHandler({...e,action:'remove'}));
     }
 
+    // 保存当前状态
     private saveState({action,target}:historyEvent) {
         if (this.isHistoryAction) {
             this.isHistoryAction = false;
@@ -78,6 +79,8 @@ export class FabricHistory implements CorePluginTemp {
             this.historyStack.shift();
             this.currentIndex--;
         }
+        console.log(this.historyStack);
+        
     }
 
     // 定位到指定历史记录索引

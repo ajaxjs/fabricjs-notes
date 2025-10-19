@@ -6,7 +6,7 @@ import { Editor } from '@/packages/editor'
 import { random } from 'es-toolkit'
 import { FabricCanvas } from '@/packages/core/built-In/fabricCanvas'
 
-import { Rect, Ellipse, Triangle, IText, Path, FabricText } from 'fabric'
+import { Rect, Ellipse, Triangle, IText, Path, FabricText, FabricImage } from 'fabric'
 // import { ArcText } from '@/packages/core/extension/object/ArcText'
 
 let icanvas: FabricCanvas | null = null;
@@ -174,12 +174,79 @@ function testArcText(canvas: FabricCanvas) {
 	canvas.add(arcText)
 }
 
+function setImgMaxSize(img: HTMLImageElement, maxWidth: number, maxHeight: number) {
+	// 获取原始图片的宽高
+	const originalWidth = img.width;
+	const originalHeight = img.height;
+
+	// 计算宽高缩放比例（如果原始尺寸小于最大限制，比例会 >=1，不缩放）
+	const widthRatio = maxWidth / originalWidth;
+	const heightRatio = maxHeight / originalHeight;
+
+	// 取最小的缩放比例（确保宽和高都不超过最大限制）
+	const scale = Math.min(widthRatio, heightRatio);
+
+	// 计算新的宽高（只在需要缩小时生效，放大不处理）
+	const newWidth = originalWidth * scale;
+	const newHeight = originalHeight * scale;
+
+	// 修改图片尺寸
+	img.width = newWidth;
+	img.height = newHeight;
+
+	// 返回处理后的图片
+	return img;
+}
+function addImage(e: any) {
+	const canvas = getCanvas()
+	const file = e.target.files[0]
+	if (!file) {
+		return
+	}
+	const reader = new FileReader()
+	reader.onload = (e: any) => {
+		const { width: w, height: h } = canvas.frame;
+		const img = new Image()
+		img.src = e.target.result as string
+		img.onload = () => {
+			let { width, height } = img;
+			const imgProps: any = {
+				left: 10,
+				top: 10,
+			};
+
+			const fabricImg = new FabricImage(img, imgProps)
+
+			if (width > w) {
+				const scale = (w * 0.8) / width;
+				width *= scale;
+				height *= scale;
+				fabricImg.scaleToWidth(width)
+			}
+			if (height > h) {
+				const scale = (h * 0.8) / height;
+				width *= scale;
+				height *= scale;
+				fabricImg.scaleToHeight(height)
+			}
+
+
+			canvas.add(fabricImg)
+			canvas.setActiveObject(fabricImg)
+			canvas.renderAll()
+		}
+	}
+	reader.readAsDataURL(file)
+}
 </script>
 
 <template>
 	<div class="w-screen h-screen border-gray-200 flex flex-col overflow-hidden p-5">
 		<div class="p-1 flex gap-1">
-			<Button variant="outline">Click me</Button>
+			<Button as="label" variant="outline">
+				Add Img
+				<input type="file" accept="image/*" @change="addImage" class="hidden" />
+			</Button>
 			<Button variant="outline" @click="addShape({})">Add Shap</Button>
 			<Button variant="outline" @click="addShape({ left: 0, top: 0 })">Add 0</Button>
 			<Button variant="outline" @click="setZoom(0.2)">Zoom+</Button>
