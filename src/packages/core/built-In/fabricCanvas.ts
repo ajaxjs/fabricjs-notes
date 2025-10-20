@@ -3,7 +3,7 @@ import { Canvas, FabricObject } from 'fabric';
 import type { CanvasOptions, TSVGExportOptions, TSVGReviver } from 'fabric';
 import type { CorePluginClass } from '../interface/core'
 import type { IHotkey, IWheelTool, ICursorTool } from '../interface';
-import { isCollection, isImage } from '../utils/check'
+import { isCollection } from '../utils/check'
 import type { TDataUrlOptions } from 'fabric';
 
 export class FabricCanvas extends Canvas {
@@ -33,7 +33,6 @@ export class FabricCanvas extends Canvas {
 		// 普通实现，待优化
 		if (name === 'brash') {
 			if (this.freeDrawingBrush === tool) return
-
 			//this.setCursor('crosshair')
 			// 开启绘制模式
 			this.isDrawingMode = true;
@@ -70,10 +69,6 @@ export class FabricCanvas extends Canvas {
 			}
 			return item
 		})
-	}
-	// 重写设置光标
-	override setCursor(value: CSSStyleDeclaration['cursor']): void {
-		this.upperCanvasEl && super.setCursor(value);
 	}
 	// 重写导出blob
 	override toBlob(options?: TDataUrlOptions) {

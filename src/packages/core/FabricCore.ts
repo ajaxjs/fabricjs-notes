@@ -10,6 +10,7 @@ import { FabricFrame } from './built-In/fabricFrame';
 import { FabricHotkey } from './built-In/fabricHotkey';
 import { FabricControl } from './built-In/fabricControl';
 import { FabricHistory } from './built-In/fabricHistory';
+import { FabricAlign } from './built-In/fabricAlign';
 //import { initAligningGuidelines } from './built-In/Guideline';
 
 class FabricCore {
@@ -25,6 +26,7 @@ class FabricCore {
 
     constructor(options?: CanvasOptions) {
         this.options = options || {} as CanvasOptions;
+        // hotkeys('*', e => console.log(e))
     }
     get wrapper(): HTMLElement | null {
         return this._wrapper
@@ -66,6 +68,8 @@ class FabricCore {
         this.canvas.use(FabricControl);
         // 历史记录插件
         this.canvas.use(FabricHistory);
+        // 对齐插件
+        this.canvas.use(FabricAlign);
 
         // 安装插件
         this.plubinMap.forEach(([plugin, options]) => this._pluginInstaller(plugin, options))

@@ -1,7 +1,9 @@
 /**
  * 基础控制插件
+ * 1. 移动画布
+ * 2. 缩放画布
  */
-import { FabricObject } from 'fabric'
+import { FabricObject, ActiveSelection } from 'fabric'
 import type { CorePluginTemp, IHotkey } from '../interface'
 import type { FabricCanvas } from './fabricCanvas'
 import type { TMat2D, Point } from 'fabric'
@@ -9,7 +11,9 @@ import type { TMat2D, Point } from 'fabric'
 export class FabricControl implements CorePluginTemp {
     static pluginName = 'Control';
     canvas: FabricCanvas;
-    hotkeys: IHotkey[] = [];
+    hotkeys: IHotkey[] = [
+        { hotkey: 'ctrl+a', label: '全选', handler: this.selectAll.bind(this) },
+    ];
     protected isPanning = false;
     protected lastPosX = 0;
     protected lastPosY = 0;
@@ -54,7 +58,7 @@ export class FabricControl implements CorePluginTemp {
     // 拖拽平移画布
     protected _bindPanCanvas() {
         const { canvas } = this;
-        
+
         // 监听键盘按下事件  
         document.addEventListener('keydown', this._spaceDown.bind(this));
 
@@ -65,6 +69,7 @@ export class FabricControl implements CorePluginTemp {
         canvas.on('mouse:down', (opt) => {
             if (this.isPanning || canvas.activeTool === 'pan') {
                 const evt: any = opt.e;
+                canvas.selection = false;
                 this.lastPosX = evt.clientX;
                 this.lastPosY = evt.clientY;
                 canvas.setCursor('grabbing');
@@ -76,14 +81,15 @@ export class FabricControl implements CorePluginTemp {
         canvas.on('mouse:move', (opt) => {
             const evt: any = opt.e;
             if ((this.isPanning || canvas.activeTool === 'pan') && evt.buttons === 1) {
-                const vpt = canvas.viewportTransform.slice() as TMat2D;
+                const vpt = canvas.viewportTransform;
                 vpt[4] += evt.clientX - this.lastPosX;
                 vpt[5] += evt.clientY - this.lastPosY;
-                canvas.setViewportTransform(vpt);
+                //canvas.setViewportTransform(vpt);
                 this.lastPosX = evt.clientX;
                 this.lastPosY = evt.clientY;
                 canvas.setCursor('grabbing');
                 canvas.fire('canvas:moveing', { x: -vpt[4], y: -vpt[5] })
+                canvas.requestRenderAll();
             }
         });
 
@@ -104,15 +110,15 @@ export class FabricControl implements CorePluginTemp {
             this.isPanning = true;
             canvas.selection = false; // 禁用选择功能 
             canvas.activeTool = 'pan'; // 切换到平移工具
-            canvas.setCursor('grab');
+            canvas.defaultCursor = 'grab';
         }
     }
     // 释放空格键结束平移画布
     protected _spaceUp(e: any) {
         if (e.code === 'Space') {
             const { canvas } = this;
-            canvas.setCursor('default');
             this.isPanning = false;
+            canvas.defaultCursor = 'default';
             canvas.selection = true; // 恢复选择功能  
             // 切换到移动工具
             canvas.activeTool = 'move';
@@ -161,6 +167,21 @@ export class FabricControl implements CorePluginTemp {
             vpt[5] += delta * setp;
         }
         canvas.setViewportTransform(vpt);
+    }
+    // 全选
+    selectAll() {
+        const { canvas } = this;
+        // 获取画布上的所有对象  
+        const allObjects = canvas.getObjects();
+
+        // 如果有对象,创建 ActiveSelection 并设置为活动对象  
+        if (allObjects.length > 0) {
+            const activeSelection = new ActiveSelection(allObjects, {
+                canvas: canvas
+            });
+            canvas.setActiveObject(activeSelection);
+            canvas.requestRenderAll();
+        }
     }
 
     dispose() {

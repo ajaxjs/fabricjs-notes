@@ -79,7 +79,6 @@ export class FabricHistory implements CorePluginTemp {
             this.historyStack.shift();
             this.currentIndex--;
         }
-        console.log(this.historyStack);
         
     }
 

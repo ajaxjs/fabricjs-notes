@@ -1,5 +1,4 @@
 import type { FabricCore } from '../'
-import type { Canvas } from 'fabric'
 import type { FabricCanvas } from '../built-In/fabricCanvas'
 
 export interface IFabricCore extends FabricCore {

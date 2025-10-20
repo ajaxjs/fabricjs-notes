@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, nextTick } from 'vue'
+import { ref } from 'vue'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu } from '@/components/qxt-vue/dropdown-menu'
 import {
@@ -11,7 +11,7 @@ import { Editor } from '@/packages/editor'
 import { random } from 'es-toolkit'
 import { FabricCanvas } from '@/packages/core/built-In/fabricCanvas'
 
-import { Rect, Ellipse, Triangle, IText, Path, FabricText, FabricImage } from 'fabric'
+import { Rect, Ellipse, Triangle, /*IText, Path, FabricText,*/ FabricImage } from 'fabric'
 import { PencilBrush, CircleBrush, SprayBrush, PatternBrush } from 'fabric'
 // import { ArcText } from '@/packages/core/extension/object/ArcText'
 
@@ -24,18 +24,18 @@ let icanvas: FabricCanvas | null = null;
 // 	stroke: 'grey',
 // 	strokeWidth: 1
 // });
-const makePath = (textObj: FabricText) => {
-	const textWidth = textObj.calcTextWidth(); // 计算文字总宽度  
-	const radius = textWidth / Math.PI; // 根据文字宽度计算半径  
+// const makePath = (textObj: FabricText) => {
+// 	const textWidth = textObj.calcTextWidth(); // 计算文字总宽度  
+// 	const radius = textWidth / Math.PI; // 根据文字宽度计算半径  
 
-	// 创建足够长的弧线  
-	const pathString = `M ${-radius} 0 A ${radius} ${radius} 0 0 1 ${radius} 0`;
-	return new Path(pathString, {
-		fill: 'transparent',
-		stroke: 'grey',
-		strokeWidth: 1
-	});
-};
+// 	// 创建足够长的弧线  
+// 	const pathString = `M ${-radius} 0 A ${radius} ${radius} 0 0 1 ${radius} 0`;
+// 	return new Path(pathString, {
+// 		fill: 'transparent',
+// 		stroke: 'grey',
+// 		strokeWidth: 1
+// 	});
+// };
 
 const editorRef = ref()
 // Editor cleanup function is handled elsewhere
@@ -128,7 +128,7 @@ function importJson() {
 }
 function onEditorMounted(canvas: FabricCanvas) {
 	icanvas = canvas
-	console.log('-onEditorMounted', canvas);
+	//console.log('-onEditorMounted', canvas);
 	//testArcText(canvas)
 	// 初始化canvas尺寸
 	canvas.frame.setFrame({
@@ -139,37 +139,37 @@ function onEditorMounted(canvas: FabricCanvas) {
 	// canvas.backgroundColor = '#f0f0f0'
 }
 
-function testArcText(canvas: FabricCanvas) {
+// function testArcText(canvas: FabricCanvas) {
 
-	const arcText = new IText('HelloWorld!', {
-		left: 100,
-		top: 100,
-		fill: '#ff0000',
-		lineHeight: 1.5,
-		fontSize: 40,
-		//charSpacing: -50,
-		//editable: true,
-	})
+// 	const arcText = new IText('HelloWorld!', {
+// 		left: 100,
+// 		top: 100,
+// 		fill: '#ff0000',
+// 		lineHeight: 1.5,
+// 		fontSize: 40,
+// 		//charSpacing: -50,
+// 		//editable: true,
+// 	})
 
-	const pathObject = makePath(arcText);
+// 	const pathObject = makePath(arcText);
 
-	arcText.set('path', pathObject);
-	arcText.set('pathStartOffset', 0);
-	setTimeout(() => {
-		console.log(arcText.__charBounds[0]);
-	}, 0);
+// 	arcText.set('path', pathObject);
+// 	arcText.set('pathStartOffset', 0);
+// 	setTimeout(() => {
+// 		console.log(arcText.__charBounds[0]);
+// 	}, 0);
 
-	arcText.on('editing:entered', () => {
-		arcText.set('path', null)
-		console.log('editing:entered');
-	})
-	arcText.on('editing:exited', () => {
-		arcText.set('path', pathObject);
-		console.log('editing:exited');
-	})
+// 	arcText.on('editing:entered', () => {
+// 		arcText.set('path', null)
+// 		console.log('editing:entered');
+// 	})
+// 	arcText.on('editing:exited', () => {
+// 		arcText.set('path', pathObject);
+// 		console.log('editing:exited');
+// 	})
 
-	canvas.add(arcText)
-}
+// 	canvas.add(arcText)
+// }
 
 function addImage(e: any) {
 	const canvas = getCanvas()

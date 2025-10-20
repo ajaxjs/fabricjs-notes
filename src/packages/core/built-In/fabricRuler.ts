@@ -1,6 +1,5 @@
 import type { IHotkey, CorePluginTemp } from '../interface'
 import type { FabricCanvas } from './fabricCanvas'
-import { Disposable } from '../utils/lifecycle'
 import { DesignUnitMode } from '../configs/background'
 import { Point, Rect as fabricRect, FabricObject } from 'fabric'
 import type { TAxis, TPointerEventInfo, TPointerEvent } from 'fabric'
