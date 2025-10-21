@@ -3,7 +3,6 @@
  * 1. 移动画布
  * 2. 缩放画布
  */
-import { FabricObject, ActiveSelection } from 'fabric'
 import type { CorePluginTemp, IHotkey } from '../interface'
 import type { FabricCanvas } from './fabricCanvas'
 import type { TMat2D, Point } from 'fabric'
@@ -11,44 +10,12 @@ import type { TMat2D, Point } from 'fabric'
 export class FabricControl implements CorePluginTemp {
     static pluginName = 'Control';
     canvas: FabricCanvas;
-    hotkeys: IHotkey[] = [
-        { hotkey: 'ctrl+a', label: '全选', handler: this.selectAll.bind(this) },
-    ];
+    hotkeys: IHotkey[] = [];
     protected isPanning = false;
     protected lastPosX = 0;
     protected lastPosY = 0;
     constructor(canvas: FabricCanvas) {
         this.canvas = canvas;
-
-        // 控制对象是否缓存渲染结果，设为false可提高动画性能但会增加渲染开销
-        FabricObject.ownDefaults.objectCaching = false
-        // 设置选中对象边框的颜色
-        FabricObject.ownDefaults.borderColor = 'blue'
-        // 设置选中对象控制点的填充颜色
-        FabricObject.ownDefaults.cornerColor = 'white'
-        // 设置选中对象控制点的描边颜色
-        FabricObject.ownDefaults.cornerStrokeColor = '#c0c0c0'
-        // 移动对象时边框的不透明度，1表示完全不透明
-        FabricObject.ownDefaults.borderOpacityWhenMoving = 1
-        // 边框粗细相对于对象大小的缩放因子（默认值为1）
-        // FabricObject.ownDefaults.borderScaleFactor = 1
-        // 控制点的大小（像素）
-        FabricObject.ownDefaults.cornerSize = 8
-        // 控制点的形状，'rect'表示矩形，可选'circle'（默认值为'rect'）
-        // FabricObject.ownDefaults.cornerStyle = 'rect'
-        // 缩放操作是否以对象中心为原点，false表示以鼠标位置为原点（默认值为false）
-        // FabricObject.ownDefaults.centeredScaling = false
-        // 旋转操作是否以对象中心为原点，true表示以中心为原点（默认值为true）
-        // FabricObject.ownDefaults.centeredRotation = true
-        // 控制点是否透明，false表示不透明
-        FabricObject.ownDefaults.transparentCorners = false
-        // 旋转控制点距离对象的偏移量（像素），控制旋转点与对象的距离
-        // FabricObject.ownDefaults.rotatingPointOffset = 1
-        // 是否锁定等比例缩放，设为true时只能按比例缩放对象
-        // FabricObject.ownDefaults.lockUniScaling = true
-        // 是否显示旋转控制点，设为false时对象将没有旋转控制点
-        // FabricObject.ownDefaults.hasRotatingPoint = false
-
         // 平移画布
         this._bindPanCanvas();
         // 滚轮操作
@@ -168,21 +135,8 @@ export class FabricControl implements CorePluginTemp {
         }
         canvas.setViewportTransform(vpt);
     }
-    // 全选
-    selectAll() {
-        const { canvas } = this;
-        // 获取画布上的所有对象  
-        const allObjects = canvas.getObjects();
 
-        // 如果有对象,创建 ActiveSelection 并设置为活动对象  
-        if (allObjects.length > 0) {
-            const activeSelection = new ActiveSelection(allObjects, {
-                canvas: canvas
-            });
-            canvas.setActiveObject(activeSelection);
-            canvas.requestRenderAll();
-        }
-    }
+
 
     dispose() {
         document.removeEventListener('keydown', this._spaceDown.bind(this));

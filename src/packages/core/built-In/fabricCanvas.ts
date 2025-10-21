@@ -1,6 +1,6 @@
 import hotkeys from 'hotkeys-js';
-import { Canvas, FabricObject } from 'fabric';
-import type { CanvasOptions, TSVGExportOptions, TSVGReviver } from 'fabric';
+import { Canvas, classRegistry, FabricObject } from 'fabric';
+import type { TOptions, CanvasOptions, TSVGExportOptions, TSVGReviver } from 'fabric';
 import type { CorePluginClass } from '../interface/core'
 import type { IHotkey, IWheelTool, ICursorTool } from '../interface';
 import { isCollection } from '../utils/check'
@@ -14,10 +14,20 @@ export class FabricCanvas extends Canvas {
 	protected _activeTool: ICursorTool = 'move';
 	// 滚轮工具
 	wheelTool: IWheelTool = 'scroll';
-	constructor(el: string | HTMLCanvasElement, options: CanvasOptions) {
+	constructor(el: string | HTMLCanvasElement, options: TOptions<CanvasOptions>) {
 		super(el, options)
 		// 导入自定义属性
-		FabricObject.customProperties = ['index', 'selectable', 'evented']
+		FabricObject.customProperties = ['index', 'label','selectable', 'evented']
+        // 控制点的大小（像素）
+        FabricObject.ownDefaults.cornerSize = 8
+        // 设置选中对象边框的颜色
+        FabricObject.ownDefaults.borderColor = 'blue'
+        // 设置选中对象控制点的填充颜色
+        FabricObject.ownDefaults.cornerColor = 'white'
+        // 设置选中对象控制点的描边颜色
+        FabricObject.ownDefaults.cornerStrokeColor = '#c0c0c0'
+        // 控制点是否透明，false表示不透明
+        FabricObject.ownDefaults.transparentCorners = false
 	}
 	get activeTool() {
 		return this._activeTool
@@ -56,12 +66,17 @@ export class FabricCanvas extends Canvas {
 	override insertAt(index: number, ...object: FabricObject[]): number {
 		return super.insertAt(index, ...this.resetObject(object))
 	}
+	// 重置对象默认值
 	private resetObject(objects: FabricObject[]) {
 		return objects.map((item) => {
 			// 元素索引从0开始
 			if (!item.hasOwnProperty('index')) {
 				const index = this._objects.length ? Math.max(...this._objects.map((vo) => vo.index + 1)) : 0
 				item.set({ index })
+			}
+			// 元素标签默认值
+			if (!item.hasOwnProperty('label')) {
+				item.set({ label: item.type+'-'+item.index })
 			}
 			// 递归处理集合对象
 			if (isCollection(item)) {
@@ -132,6 +147,11 @@ export class FabricCanvas extends Canvas {
 		// 注册到插件列表
 		this.pluginMap.push(pluginKey)
 	}
+	// 从json创建对象
+	objectFromJSON(json: any) {
+        const ObjectClass: any = classRegistry.getClass(json.type);
+        return ObjectClass.fromObject(json);
+    }
 	// 重写销毁canvas
 	override async dispose(): Promise<boolean> {
 		return super.dispose().then((res) => {

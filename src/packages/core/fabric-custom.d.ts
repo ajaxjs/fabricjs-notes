@@ -2,6 +2,7 @@ import { FabricObject } from 'fabric';
   
 declare module 'fabric' {  
   interface FabricObject {  
-    index: number;  
+    index: number;
+    label: string;
   }  
 }
