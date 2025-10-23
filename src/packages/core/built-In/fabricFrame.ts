@@ -34,7 +34,8 @@ export class FabricFrame implements CorePluginTemp {
         const bg = new Rect({
             selectable: false,
             evented: false,
-            ...rectProps
+            ...rectProps,
+            label: 'background',
         })
         this.canvas.add(bg)
         //this.canvas.sendToBack(bg)
