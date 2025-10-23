@@ -78,7 +78,10 @@ class FabricCore {
         // 监听wrapper resize事件
         const resizeFn = useDebounceFn(([entry]) => {
             const { width, height } = entry!.contentRect
-            this.canvas!.setDimensions({ width, height })
+            if(this.canvas){
+                this.canvas.setDimensions({ width, height })
+                this.canvas.fire('canvas:resize', { width, height })
+            }
         }, 200)
         useResizeObserver(this._wrapper, resizeFn)
 

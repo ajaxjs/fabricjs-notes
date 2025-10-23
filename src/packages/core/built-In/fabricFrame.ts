@@ -13,6 +13,14 @@ export class FabricFrame implements CorePluginTemp {
     clipPath?: Rect
     constructor(canvas: FabricCanvas) {
         this.canvas = canvas
+        // 画面重新居中
+        canvas.on('canvas:resize', (e) => {
+            const { width: canvaWidth, height: canvaHeight } = e
+            const { width, height } = this;
+            this.left = (canvaWidth - width) / 2;
+            this.top = (canvaHeight - height) / 2;
+            this.canvas.setViewportTransform([1, 0, 0, 1, this.left, this.top])
+        })
     }
 
     setFrame(props: IFrameOptions) {

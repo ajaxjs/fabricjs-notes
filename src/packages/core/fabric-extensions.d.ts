@@ -21,5 +21,9 @@ declare module 'fabric' {
             y: number;
             //delta: Point;
         };
+        'canvas:resize': {
+            width: number;
+            height: number;
+        }
     }
 }
