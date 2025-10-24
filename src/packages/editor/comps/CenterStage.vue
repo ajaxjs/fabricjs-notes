@@ -9,9 +9,9 @@ const settingStore = useSettingStore()
 
 const emit = defineEmits(['mounted'])
 const editorRef = ref();
-const core = new FabricCore({},{
+const core = new FabricCore({}, {
     ruler: {
-        enabled: true,
+        enabled: settingStore.rulerEnabled,
         isDark: isDark.value,
     }
 });
@@ -41,12 +41,16 @@ onUnmounted(() => core.destroy())
 </script>
 
 <template>
-    <div ref="editorRef" id="editor" class="flex-1"></div>
+    <div class="editor-wrap flex-1 min-w-0 w-full overflow-hidden">
+        <div ref="editorRef" id="editor" class="absolute top-0 left-0 w-full h-full"></div>
+    </div>
 </template>
 
 <style lang="scss" scoped>
+.editor-wrap {
+    position: relative;
+}
 #editor {
     width: 100%;
-    min-height: 400px;
 }
 </style>

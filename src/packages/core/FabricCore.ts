@@ -28,8 +28,8 @@ class FabricCore {
     constructor(options?: any, pluginOptionsMap?: IPluginOptionMap) {
         this.options = options as CanvasOptions;
         // 初始化插件配置
-        if(pluginOptionsMap) this.pluginOptionsMap = pluginOptionsMap;
-        
+        if (pluginOptionsMap) this.pluginOptionsMap = pluginOptionsMap;
+
         // hotkeys('*', e => console.log(e))
     }
     get wrapper(): HTMLElement | null {
@@ -49,6 +49,7 @@ class FabricCore {
             throw new Error('mount element not found')
         }
         wrapper.style.position = 'relative';
+        wrapper.style.minWidth = '0px';
         this._wrapper = wrapper
         const { width, height } = wrapper.getBoundingClientRect();
         // 创建画布Dom
@@ -66,7 +67,7 @@ class FabricCore {
         // 网格插件
         this.canvas.use(FabricGuide);
         // 画板插件
-        this.canvas.use(FabricFrame);
+        this.canvas.use(FabricFrame, this.pluginOptionsMap.frame);
         // 内置热键插件
         this.canvas.use(FabricHotkey);
         // 基础控制插件
@@ -83,12 +84,13 @@ class FabricCore {
         // 监听wrapper resize事件
         const resizeFn = useDebounceFn(([entry]) => {
             const { width, height } = entry!.contentRect
-            if(this.canvas){
+            if (this.canvas) {
                 this.canvas.setDimensions({ width, height })
                 this.canvas.fire('canvas:resize', { width, height })
             }
-        }, 200)
+        }, 10)
         useResizeObserver(this._wrapper, resizeFn)
+
 
         return this;
     }

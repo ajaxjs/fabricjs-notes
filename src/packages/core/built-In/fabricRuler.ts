@@ -306,10 +306,13 @@ export class FabricRuler implements CorePluginTemp {
     if (value) {
       this.canvas.on(this.canvasEvents)
       this.render({ ctx: this.canvas.contextContainer })
-    }
-    else {
+    } else {
       this.canvas.off(this.canvasEvents)
       this.canvas.requestRenderAll()
+    }
+    if (this.canvas.frame) {
+      this.canvas.frame.darwFrame()
+      this.canvas.renderAll()
     }
   }
   // 切换标尺开启状态

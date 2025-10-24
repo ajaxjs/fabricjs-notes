@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import CenterStage from './comps/CenterStage.vue'
-import SideLeft from './comps/SideLeft.vue'
+import SideLeft from './side-left/SideLeft.vue'
 import SideRight from './comps/SideRight.vue'
 </script>
 
