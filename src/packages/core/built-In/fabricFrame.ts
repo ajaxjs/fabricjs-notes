@@ -10,11 +10,12 @@ export class FabricFrame implements CorePluginTemp {
     top: number = 0
     width: number = 0
     height: number = 0
+    inited: boolean = false
     clipPath?: Rect
     constructor(canvas: FabricCanvas) {
         this.canvas = canvas
         // 画面重新居中
-        canvas.on('canvas:resize', (e) => {
+        this.inited && canvas.on('canvas:resize', (e) => {
             const { width: canvaWidth, height: canvaHeight } = e
             const { width, height } = this;
             this.left = (canvaWidth - width) / 2;
@@ -34,6 +35,7 @@ export class FabricFrame implements CorePluginTemp {
         const bg = new Rect({
             selectable: false,
             evented: false,
+            fill: '#ffffff',
             ...rectProps,
             label: 'background',
         })

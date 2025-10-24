@@ -1,56 +1,20 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick } from 'vue'
-import { FabricCore } from '../core'
-
-// 移除未使用的导入
-//import type { IPluginTemplate } from '../core/interface/plugin'
-//import { BoardPlugin } from '../core/plugins'
-const emit = defineEmits(['mounted'])
-const editorRef = ref();
-const app = new FabricCore();
-
-onMounted(() => {
-    app.mount(editorRef.value)
-    const canvas = app.getCanvas()
-    nextTick(() => emit('mounted', canvas, app))
-    
-
-    //app.addBoard({ width: 400, height: 600, fill: '#f0f0f0', })
-    //canvas.renderAll()
-    /*
-    const circle = new Circle({
-        radius: 50,
-        fill: '#666',
-        left: 50,
-        top: 50,
-    })
-    canvas.add(circle)
-    const rect = new Rect({
-        width: 50,
-        height: 50,
-        fill: '#999',
-        left: 100,
-        top: 100,
-    })
-    canvas.add(rect)
-    canvas.renderAll()*/
-})
-
-defineExpose({
-    editor: app,
-})
-
-// 组件卸载时销毁canvas
-onUnmounted(() => app.destroy())
+import CenterStage from './comps/CenterStage.vue'
+import SideLeft from './comps/SideLeft.vue'
+import SideRight from './comps/SideRight.vue'
 </script>
 
 <template>
-    <div ref="editorRef" id="editor"></div>
+    <div class="editor flex overflow-hidden">
+        <SideLeft />
+        <CenterStage />
+        <SideRight />
+    </div>
 </template>
 
 <style lang="scss" scoped>
-#editor {
-    width: 100%;
-    height: 400px;
+.editor {
+    min-width: 400px;
+    min-height: 400px;
 }
 </style>

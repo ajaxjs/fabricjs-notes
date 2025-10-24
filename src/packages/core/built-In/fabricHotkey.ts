@@ -4,7 +4,7 @@
 
 import type { CorePluginTemp, IHotkey } from '../interface'
 import type { FabricCanvas } from './fabricCanvas'
-import { Group, ActiveSelection, FabricObject, classRegistry } from 'fabric'
+import { Group, ActiveSelection } from 'fabric'
 
 export class FabricHotkey implements CorePluginTemp {
     static pluginName = 'Hotkey';

@@ -1,7 +1,7 @@
 //import { Canvas } from 'fabric'
 import hotkeys from 'hotkeys-js';
 import type { CanvasOptions } from 'fabric';
-import type { IPluginMap, IPluginTempl, IPluginOption, IPluginClass, IPluginClass2 } from './interface'
+import type { IPluginMap, IPluginTempl, IPluginOption, IPluginClass, IPluginClass2, IPluginOptionMap } from './interface'
 import { useDebounceFn, useResizeObserver } from '@vueuse/core';
 import { FabricRuler } from './built-In/fabricRuler';
 import { FabricGuide } from './built-In/fabricGuide';
@@ -20,12 +20,16 @@ class FabricCore {
     protected options: CanvasOptions;
     // 插件map
     protected plubinMap: IPluginMap = new Map()
+    protected pluginOptionsMap: IPluginOptionMap = {};
     // 插件实例map
     protected plugins: Record<string, IPluginClass2> = {};
     [key: string]: any;
 
-    constructor(options?: CanvasOptions) {
-        this.options = options || {} as CanvasOptions;
+    constructor(options?: any, pluginOptionsMap?: IPluginOptionMap) {
+        this.options = options as CanvasOptions;
+        // 初始化插件配置
+        if(pluginOptionsMap) this.pluginOptionsMap = pluginOptionsMap;
+        
         // hotkeys('*', e => console.log(e))
     }
     get wrapper(): HTMLElement | null {
@@ -46,7 +50,7 @@ class FabricCore {
         }
         wrapper.style.position = 'relative';
         this._wrapper = wrapper
-        const { width, height } = wrapper.getBoundingClientRect()
+        const { width, height } = wrapper.getBoundingClientRect();
         // 创建画布Dom
         this._canvasDom = document.createElement('canvas')
         wrapper.appendChild(this._canvasDom)
@@ -57,9 +61,10 @@ class FabricCore {
             width,
             height,
         })
-        // 内置插件
-        new FabricRuler(this.canvas);
-        new FabricGuide(this.canvas);
+        // 标尺插件
+        this.canvas.use(FabricRuler, this.pluginOptionsMap.ruler);
+        // 网格插件
+        this.canvas.use(FabricGuide);
         // 画板插件
         this.canvas.use(FabricFrame);
         // 内置热键插件

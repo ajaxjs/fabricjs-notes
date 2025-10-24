@@ -15,7 +15,7 @@ declare class IPluginClass2 extends CorePluginTemp {
 export declare interface CorePluginClass {
     pluginName: string;
     hotkeys: IHotkey[];
-    new(canvas: FabricCanvas): IPluginClass2;
+    new(canvas: FabricCanvas, options?: any): IPluginClass2;
 }
 
 
@@ -23,7 +23,7 @@ export declare interface CorePluginClass {
 export interface IFrameOptions {
     width: number
     height: number
-    fill: string
+    fill?: string
     overlayFill: string
 }
 

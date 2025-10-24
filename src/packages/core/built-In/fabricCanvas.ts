@@ -122,7 +122,7 @@ export class FabricCanvas extends Canvas {
 		return super.toSVG(options, reviver);
 	}
 	// 注册插件
-	use(plugin: any) {
+	use(plugin: any, options?: any) {
 		const { pluginName } = plugin;
 		if (!pluginName) {
 			throw new Error('pluginName is required');
@@ -131,7 +131,7 @@ export class FabricCanvas extends Canvas {
 		}
 		const pluginKey = pluginName.toLowerCase();
 		// 实例化插件
-		const pluginInstance = new (plugin as CorePluginClass)(this)
+		const pluginInstance = new (plugin as CorePluginClass)(this, options)
 		// 绑定快捷键
 		pluginInstance.hotkeys.forEach((item: IHotkey) => {
 			const { hotkey, handler } = item

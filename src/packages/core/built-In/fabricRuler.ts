@@ -22,10 +22,21 @@ type IDrawRect = {
 
 const PiBy180 = Math.PI / 180
 
+export interface ThemeColor {
+  // 背景颜色
+  backgroundColor?: string
+  // 边框颜色
+  borderColor?: string
+  // 高亮颜色
+  highlightColor?: string
+  // 文字颜色
+  textColor?: string
+}
+
 /**
  * 配置
  */
-export interface RulerOptions {
+export interface RulerOptions extends ThemeColor {
   /**
    * 标尺宽高
    * @default 10
@@ -45,28 +56,12 @@ export interface RulerOptions {
   enabled?: boolean
 
   /**
-   * 背景颜色
-   */
-  backgroundColor?: string
-
-  /**
-   * 文字颜色
-   */
-  textColor?: string
-
-  /**
-   * 边框颜色
-   */
-  borderColor?: string
-
-  /**
-   * 高亮颜色
-   */
-  highlightColor?: string
-  /**
    * 单位名称
    */
-  unitName: string
+  unitName: string,
+
+  // 是否为深色主题
+  isDark: boolean,
 
 }
 
@@ -74,7 +69,9 @@ export type HighlightRect = { skip?: TAxis } & Rect
 
 export class FabricRuler implements CorePluginTemp {
   static pluginName: string = 'Ruler'
-  hotkeys: IHotkey[] = [];
+  hotkeys: IHotkey[] = [
+    { hotkey: 'ctrl+r', label: '开启/关闭标尺', handler: this.toggleEnabled.bind(this) }
+  ];
 
   private canvasEvents
   public lastCursor: string
@@ -87,29 +84,39 @@ export class FabricRuler implements CorePluginTemp {
     y: HighlightRect[]
   }
   private unitMode: number
-  private isDark: boolean
+  private themes: Record<string, ThemeColor> = {
+    dark: {
+      backgroundColor: '#242424',
+      borderColor: '#555',
+      highlightColor: '#165dff3b',
+      textColor: '#ddd',
+    },
+    light: {
+      backgroundColor: '#fff',
+      borderColor: '#ccc',
+      highlightColor: '#165dff3b',
+      textColor: '#444',
+    },
+  }
   private canvas: FabricCanvas
 
   constructor(canvas: FabricCanvas, options?: Partial<RulerOptions>) {
     this.canvas = canvas
     this.lastCursor = canvas.defaultCursor
     this.unitMode = 1 // 默认单位模式
-    this.isDark = false // 默认非深色模式
+    const themeColor = this.themes[options?.isDark ? 'dark' : 'light'] as ThemeColor;
+    console.log('options?.isDark', options?.isDark);
+
 
     // 合并默认配置
-    this.options = Object.assign({
+    this.options = {
       ruleSize: 20,
       fontSize: 8,
-      enabled: true,
-      backgroundColor: '#fff',
-      borderColor: '#ccc',
-      highlightColor: '#165dff3b',
-      textColor: '#444',
+      enabled: false,
       unitName: 'px',
-    }, options)
-
-    // 设置初始配置
-    this.updateTheme(this.isDark)
+      ...themeColor,
+      ...options,
+    } as Required<RulerOptions>
 
     this.canvasEvents = {
       'after:render': this.render.bind(this),
@@ -127,28 +134,15 @@ export class FabricRuler implements CorePluginTemp {
    * 更新主题配置
    */
   public updateTheme(isDark: boolean): void {
-    this.isDark = isDark
-    const unitName = DesignUnitMode.filter(ele => ele.id === this.unitMode)[0]?.name || 'px'
+    this.options.isDark = isDark
+    const unitName = DesignUnitMode.filter(ele => ele.id === this.unitMode)[0]?.name || 'px';
+    const themeColor = this.themes[isDark ? 'dark' : 'light'] as ThemeColor;
 
     this.options = {
       ...this.options,
-      ...(isDark
-        ? {
-          backgroundColor: '#242424',
-          borderColor: '#555',
-          highlightColor: '#165dff3b',
-          textColor: '#ddd',
-          unitName: unitName,
-        }
-        : {
-          backgroundColor: '#fff',
-          borderColor: '#ccc',
-          highlightColor: '#165dff3b',
-          textColor: '#444',
-          unitName: unitName,
-        }),
+      ...themeColor,
+      unitName: unitName,
     }
-
     this.render({ ctx: this.canvas.contextContainer })
   }
 
@@ -317,6 +311,10 @@ export class FabricRuler implements CorePluginTemp {
       this.canvas.off(this.canvasEvents)
       this.canvas.requestRenderAll()
     }
+  }
+  // 切换标尺开启状态
+  toggleEnabled() {
+    this.enabled = !this.enabled
   }
 
   /**
