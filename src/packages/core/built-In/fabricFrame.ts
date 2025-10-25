@@ -66,7 +66,8 @@ export class FabricFrame implements CorePluginTemp {
                 fill,
                 label: 'background',
             })
-            this.canvas.add(bg)
+            this.canvas.add(bg);
+            this.canvas.sendObjectToBack(bg);
             this._bindEvent();
         }
     }

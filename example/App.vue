@@ -1,10 +1,18 @@
 <script setup lang="ts">
+import { onEditorReady } from '@/packages/core'
 import { Editor, HeadBar } from '@/packages/editor'
-import { useDark, useToggle } from '@vueuse/core'
-import { Button } from '@/components/ui/button';
-import { Moon, Sun } from 'lucide-vue-next';
-const isDark = useDark()
-const toggleDark = useToggle(isDark)
+import { Rect } from 'fabric'
+
+onEditorReady(({ canvas }) => {
+	const rect = new Rect({
+		left: 100,
+		top: 100,
+		width: 100,
+		height: 100,
+		fill: 'green',
+	})
+	canvas.add(rect)
+})
 </script>
 
 <template>
