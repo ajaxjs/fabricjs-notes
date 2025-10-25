@@ -43,6 +43,8 @@ export class FabricHistory implements CorePluginTemp {
     protected _canvasChange() {
         const { canvas } = this;
         this.changeHandler = debounce((e: any) => {
+            console.log('---canvas:change',e);
+            
             this.saveState.call(this,e)
         }, 300)
         // 对象修改事件

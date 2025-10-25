@@ -1,1 +1,1 @@
-export { default as FabricCore } from './FabricCore'
+export { default as FabricCore, onEditorReady } from './FabricCore'

@@ -13,10 +13,36 @@ import { FabricHistory } from './built-In/fabricHistory';
 import { FabricAlign } from './built-In/fabricAlign';
 //import { initAligningGuidelines } from './built-In/Guideline';
 
+// 定义回调函数类型
+type EditorReadyCallback = (editor: FabricCore) => void;
+
+// 存储回调与实例的映射
+interface CallbackEntry {
+    instanceId: string;
+    callback: EditorReadyCallback;
+}
+// 存储所有注册的回调
+const editorReadyCallbacks: CallbackEntry[] = [];
+// 存储所有实例
+const editorInstances: Record<string, FabricCore> = {};
+
+// 钩子函数，用于注册回调
+export function onEditorReady(callback: EditorReadyCallback, instanceId?: string): void {
+    instanceId = instanceId || '';
+    const entry: CallbackEntry = { instanceId, callback };
+    editorReadyCallbacks.push(entry);
+    // 触发延时挂载
+    if (editorInstances[instanceId]) {
+        entry.callback(editorInstances![instanceId]!);
+    }
+    
+}
+
 class FabricCore {
+    protected id: string = '';
     protected _wrapper: HTMLElement | null = null;
     protected _canvasDom: HTMLCanvasElement | null = null;
-    protected canvas: FabricCanvas | null = null;
+    protected _canvas: FabricCanvas | null = null;
     protected options: CanvasOptions;
     // 插件map
     protected plubinMap: IPluginMap = new Map()
@@ -29,18 +55,16 @@ class FabricCore {
         this.options = options as CanvasOptions;
         // 初始化插件配置
         if (pluginOptionsMap) this.pluginOptionsMap = pluginOptionsMap;
-
         // hotkeys('*', e => console.log(e))
     }
     get wrapper(): HTMLElement | null {
         return this._wrapper
     }
-    // 获取canvas实例
-    getCanvas(): FabricCanvas {
-        if (!this.canvas) {
+    get canvas(): FabricCanvas {
+        if (!this._canvas) {
             throw new Error('canvas is not mounted')
         }
-        return this.canvas
+        return this._canvas
     }
     // 挂载canvas
     mount(target: HTMLCanvasElement | string) {
@@ -48,6 +72,7 @@ class FabricCore {
         if (!wrapper) {
             throw new Error('mount element not found')
         }
+
         wrapper.style.position = 'relative';
         wrapper.style.minWidth = '0px';
         this._wrapper = wrapper
@@ -57,40 +82,48 @@ class FabricCore {
         wrapper.appendChild(this._canvasDom)
 
         // 画布
-        this.canvas = new FabricCanvas(this._canvasDom, {
+        const canvas = new FabricCanvas(this._canvasDom, {
             ...this.options,
             width,
             height,
-        })
+        });
+        this._canvas = canvas;
         // 标尺插件
-        this.canvas.use(FabricRuler, this.pluginOptionsMap.ruler);
+        canvas.use(FabricRuler, this.pluginOptionsMap.ruler);
         // 网格插件
-        this.canvas.use(FabricGuide);
+        canvas.use(FabricGuide);
         // 画板插件
-        this.canvas.use(FabricFrame, this.pluginOptionsMap.frame);
+        canvas.use(FabricFrame, this.pluginOptionsMap.frame);
         // 内置热键插件
-        this.canvas.use(FabricHotkey);
+        canvas.use(FabricHotkey);
         // 基础控制插件
-        this.canvas.use(FabricControl);
+        canvas.use(FabricControl);
         // 历史记录插件
-        this.canvas.use(FabricHistory);
+        canvas.use(FabricHistory);
         // 对齐插件
-        this.canvas.use(FabricAlign);
-
+        canvas.use(FabricAlign);
         // 安装插件
         this.plubinMap.forEach(([plugin, options]) => this._pluginInstaller(plugin, options))
-        //initAligningGuidelines(this.canvas)
+        //initAligningGuidelines(canvas)
+
+        
+        // 存储实例
+        editorInstances[this.id] = this as FabricCore;
+        // 调用所有注册的editorReady回调函数
+        //editorReadyCallbacks.forEach(callback => callback(canvas!, this));
+        editorReadyCallbacks
+            .filter(entry => entry.instanceId === this.id || entry.instanceId === '')
+            .forEach(entry => entry.callback(this));
 
         // 监听wrapper resize事件
         const resizeFn = useDebounceFn(([entry]) => {
             const { width, height } = entry!.contentRect
-            if (this.canvas) {
-                this.canvas.setDimensions({ width, height })
-                this.canvas.fire('canvas:resize', { width, height })
+            if (canvas) {
+                canvas.setDimensions({ width, height })
+                canvas.fire('canvas:resize', { width, height })
             }
         }, 10)
         useResizeObserver(this._wrapper, resizeFn)
-
 
         return this;
     }
@@ -105,6 +138,7 @@ class FabricCore {
             this._pluginInstaller(plugin, options)
         }
     }
+
     protected _pluginInstaller(plugin: IPluginTempl, options?: IPluginOption) {
         if (!this.canvas) {
             throw new Error('canvas is not mounted')
@@ -118,7 +152,7 @@ class FabricCore {
         })
     }
     protected _destroy() {
-        this.canvas = null;
+        this._canvas = null;
         this._wrapper?.querySelectorAll('canvas').forEach((item) => item.remove());
         this._wrapper = null;
         this._canvasDom = null;

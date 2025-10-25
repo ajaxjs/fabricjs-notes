@@ -310,6 +310,9 @@ export class FabricRuler implements CorePluginTemp {
       this.canvas.off(this.canvasEvents)
       this.canvas.requestRenderAll()
     }
+    // 触发标尺切换事件
+    this.canvas.fire('canvas:ruler_toggle', { enabled: value })
+    // 当启用frame时，每次重绘页面遮罩
     if (this.canvas.frame) {
       this.canvas.frame.darwFrame()
       this.canvas.renderAll()

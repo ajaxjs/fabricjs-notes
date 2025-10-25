@@ -2,9 +2,10 @@
 import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { FabricCore } from '../../core'
 import { useDark } from '@vueuse/core'
-import { useSettingStore } from '../stores/index.ts'
+import { useSettingStore,useEditorStore } from '../stores/index.ts'
 
 const isDark = useDark()
+// 设置仓库
 const settingStore = useSettingStore()
 
 const emit = defineEmits(['mounted'])
@@ -16,13 +17,21 @@ const core = new FabricCore({}, {
     }
 });
 
+// 编辑器仓库
+const editorStore = useEditorStore()
+
 onMounted(() => {
     core.mount(editorRef.value)
-    const canvas = core.getCanvas()
+    const canvas = core.canvas;
+    editorStore.canvas = canvas
     canvas.frame.setFrame({
         width: 400,
         height: 600
     });
+    // 监听标尺切换事件
+    canvas.on('canvas:ruler_toggle', ({ enabled }) => {
+        settingStore.rulerEnabled = enabled
+    })
     // 触发 mounted 事件
     nextTick(() => emit('mounted', canvas, core))
     // 监听 isDark 变化
