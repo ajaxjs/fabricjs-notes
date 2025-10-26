@@ -1,0 +1,49 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "title": "IText Properties",
+    "description": "JSON Schema for IText class properties, excluding inherited properties from FabricText",
+    "properties": {
+        "cursorColor": {
+            "type": "string",
+            "default": "#333",
+            "description": "光标颜色"
+        },
+        "cursorDelay": {
+            "type": "number",
+            "default": 600,
+            "description": "光标闪烁之间的延迟（以毫秒为单位）"
+        },
+        "cursorDuration": {
+            "type": "number",
+            "default": 600,
+            "description": "光标动画的持续时间（以毫秒为单位）"
+        },
+        "cursorWidth": {
+            "type": "number",
+            "default": 2,
+            "description": "光标的宽度（以像素为单位）"
+        },
+        "editingBorderColor": {
+            "type": "string",
+            "default": "rgba(102,153,255,0.75)",
+            "description": "编辑模式下边框的颜色"
+        },
+        "isEditing": {
+            "type": "boolean",
+            "default": false,
+            "description": "指示对象是否处于编辑模式"
+        },
+        "selectionEnd": {
+            "type": "number",
+            "default": 0,
+            "description": "文本选择结束的位置"
+        },
+        "selectionStart": {
+            "type": "number",
+            "default": 0,
+            "description": "文本选择开始的位置"
+        }
+    },
+    "additionalProperties": false
+}

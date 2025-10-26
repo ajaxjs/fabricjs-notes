@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Triangle",
+  "description": "基于 Fabric.js 文档的 Triangle 类独有属性 JSON Schema，排除 FabricObject 中的属性",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": ["triangle"],
+      "default": "triangle",
+      "description": "对象的类型，固定为 'triangle'，用于标识三角形对象。"
+    }
+  },
+  "required": ["type"],
+  "additionalProperties": false
+}

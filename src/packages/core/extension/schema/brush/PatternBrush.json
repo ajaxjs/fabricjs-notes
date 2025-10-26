@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PatternBrush",
+  "description": "Fabric.js PatternBrush 类独有属性参数模式",
+  "type": "object",
+  "properties": {
+    "source": {
+      "type": "object",
+      "description": "用作图案的图像源（HTMLImageElement 或 HTMLCanvasElement）"
+    }
+  },
+  "additionalProperties": false
+}

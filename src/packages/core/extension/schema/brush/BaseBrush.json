@@ -1,0 +1,72 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "BaseBrush",
+    "description": "Fabric.js BaseBrush 类属性参数模式",
+    "type": "object",
+    "properties": {
+        "canvas": {
+            "type": "object",
+            "description": ""
+        },
+        "color": {
+            "type": "string",
+            "default": "rgb(0, 0, 0)",
+            "description": "画笔的颜色"
+        },
+        "limitedToCanvasSize": {
+            "type": "boolean",
+            "default": false,
+            "description": "当为 `true` 时，自由绘图仅限于白板大小。默认为 false。"
+        },
+        "shadow": {
+            "type": [
+                "null",
+                "object"
+            ],
+            "default": null,
+            "description": "表示此形状阴影的阴影对象。向后不兼容注意：自 v1.2.12 起，此属性替换了 “shadowColor” (String)、“shadowOffsetX” (Number)、“shadowOffsetY” (Number) 和 “shadowBlur” (Number)。"
+        },
+        "strokeDashArray": {
+            "type": [
+                "null",
+                "array"
+            ],
+            "items": {
+                "type": "number"
+            },
+            "default": null,
+            "description": "描边虚线数组。"
+        },
+        "strokeLineCap": {
+            "type": "string",
+            "enum": [
+                "butt",
+                "round",
+                "square"
+            ],
+            "default": "round",
+            "description": "画笔的线条结束样式（“butt”、“round” 或 “square” 中的一个）"
+        },
+        "strokeLineJoin": {
+            "type": "string",
+            "enum": [
+                "bevel",
+                "round",
+                "miter"
+            ],
+            "default": "round",
+            "description": "画笔的拐角样式（“bevel”、“round” 或 “miter” 中的一个）"
+        },
+        "strokeMiterLimit": {
+            "type": "number",
+            "default": 10,
+            "description": "画笔的最大斜接长度（用于 strokeLineJoin = “miter”）"
+        },
+        "width": {
+            "type": "number",
+            "default": 1,
+            "description": "画笔的宽度，必须是数字，不是字符串字面量"
+        }
+    },
+    "additionalProperties": false
+}

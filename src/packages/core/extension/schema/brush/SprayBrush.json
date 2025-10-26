@@ -1,0 +1,24 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "SprayBrush",
+    "description": "Fabric.js SprayBrush 类独有属性参数模式",
+    "type": "object",
+    "properties": {
+        "density": {
+            "type": "number",
+            "default": 20,
+            "description": "喷雾点的密度"
+        },
+        "dotWidth": {
+            "type": "number",
+            "default": 1,
+            "description": "每个喷雾点的宽度"
+        },
+        "dotWidthVariance": {
+            "type": "number",
+            "default": 1,
+            "description": "喷雾点宽度的随机变化量"
+        }
+    },
+    "additionalProperties": false
+}

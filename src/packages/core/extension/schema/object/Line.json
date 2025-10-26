@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Line",
+  "description": "基于 Fabric.js 文档的 Line 类独有属性 JSON Schema，排除 FabricObject 中的属性",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": ["line"],
+      "default": "line",
+      "description": "对象的类型，固定为 'line'，用于标识线段对象。"
+    },
+    "x1": {
+      "type": "number",
+      "default": 0,
+      "description": "线段起点的 x 坐标。"
+    },
+    "y1": {
+      "type": "number",
+      "default": 0,
+      "description": "线段起点的 y 坐标。"
+    },
+    "x2": {
+      "type": "number",
+      "default": 0,
+      "description": "线段终点的 x 坐标。"
+    },
+    "y2": {
+      "type": "number",
+      "default": 0,
+      "description": "线段终点的 y 坐标。"
+    }
+  },
+  "required": ["type", "x1", "y1", "x2", "y2"],
+  "additionalProperties": false
+}

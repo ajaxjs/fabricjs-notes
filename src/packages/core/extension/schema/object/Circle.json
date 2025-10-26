@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Circle",
+  "description": "基于 Fabric.js 文档的 Circle 类独有属性 JSON Schema，排除 FabricObject 中的属性",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": ["circle"],
+      "default": "circle",
+      "description": "对象的类型，固定为 'circle'，用于标识圆形对象。"
+    },
+    "radius": {
+      "type": "number",
+      "default": 0,
+      "description": "圆的半径。"
+    },
+    "startAngle": {
+      "type": "number",
+      "default": 0,
+      "description": "圆弧的起始角度，以弧度为单位。"
+    },
+    "endAngle": {
+      "type": "number",
+      "default": 6.283185307179586,
+      "description": "圆弧的结束角度，以弧度为单位，默认值为 2π（完整圆）。"
+    }
+  },
+  "required": ["type", "radius"],
+  "additionalProperties": false
+}

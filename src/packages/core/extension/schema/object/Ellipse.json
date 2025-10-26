@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Ellipse",
+  "description": "基于 Fabric.js 文档的 Ellipse 类独有属性 JSON Schema，排除 FabricObject 中的属性",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": ["ellipse"],
+      "default": "ellipse",
+      "description": "对象的类型，固定为 'ellipse'，用于标识椭圆对象。"
+    },
+    "rx": {
+      "type": "number",
+      "default": 0,
+      "description": "椭圆的水平半径。"
+    },
+    "ry": {
+      "type": "number",
+      "default": 0,
+      "description": "椭圆的垂直半径。"
+    }
+  },
+  "required": ["type", "rx", "ry"],
+  "additionalProperties": false
+}

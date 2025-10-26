@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Rect",
+  "description": "基于 Fabric.js 文档的 Rect 类独有属性 JSON Schema，排除 FabricObject 中的属性",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": ["rect"],
+      "default": "rect",
+      "description": "对象的类型，固定为 'rect'，用于标识矩形对象。"
+    }
+  },
+  "required": ["type"],
+  "additionalProperties": false
+}

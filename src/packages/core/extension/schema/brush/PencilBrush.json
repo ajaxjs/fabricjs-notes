@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PencilBrush",
+  "description": "Fabric.js PencilBrush 类独有属性参数模式",
+  "type": "object",
+  "properties": {
+    "decimate": {
+      "type": "number",
+      "default": 0.4,
+      "description": "移除连续点之间的像素距离（用于简化自由绘制的点）"
+    }
+  },
+  "additionalProperties": false
+}

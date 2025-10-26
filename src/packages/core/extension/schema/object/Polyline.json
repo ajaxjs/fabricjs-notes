@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Polyline",
+  "description": "基于 Fabric.js 文档的 Polyline 类独有属性 JSON Schema，排除 FabricObject 中的属性",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": ["polyline"],
+      "default": "polyline",
+      "description": "对象的类型，固定为 'polyline'，用于标识折线对象。"
+    },
+    "points": {
+      "type": ["array", "null"],
+      "items": {
+        "type": "object",
+        "properties": {
+          "x": { "type": "number", "description": "点的 x 坐标。" },
+          "y": { "type": "number", "description": "点的 y 坐标。" }
+        },
+        "required": ["x", "y"],
+        "additionalProperties": false
+      },
+      "default": null,
+      "description": "定义折线的点数组，每个点包含 x 和 y 坐标，如 [{x: 0, y: 0}, {x: 100, y: 100}]。"
+    }
+  },
+  "required": ["type", "points"],
+  "additionalProperties": false
+}

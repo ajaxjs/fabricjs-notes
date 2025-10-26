@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Path",
+  "description": "基于 Fabric.js 文档的 Path 类独有属性 JSON Schema，排除 FabricObject 中的属性",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": ["path"],
+      "default": "path",
+      "description": "对象的类型，固定为 'path'，用于标识路径对象。"
+    },
+    "path": {
+      "type": ["array", "null"],
+      "items": {
+        "type": "array",
+        "description": "描述路径的命令数组，每个命令包含指令名称和坐标参数。"
+      },
+      "default": null,
+      "description": "定义路径的 SVG 路径命令数组，格式为 [['M', x, y], ['L', x, y], ...]，如 ['M', 0, 0], ['L', 100, 100]。"
+    },
+    "pathOffset": {
+      "type": ["object", "null"],
+      "properties": {
+        "x": { "type": "number", "description": "路径的水平偏移量。" },
+        "y": { "type": "number", "description": "路径的垂直偏移量。" }
+      },
+      "default": null,
+      "description": "路径的偏移量，用于调整路径相对于其位置的渲染中心。"
+    }
+  },
+  "required": ["type", "path"],
+  "additionalProperties": false
+}

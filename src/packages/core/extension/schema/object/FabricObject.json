@@ -1,0 +1,406 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "FabricObject",
+  "description": "基于 Fabric.js 文档的 FabricObject 属性 JSON Schema",
+  "properties": {
+    "absolutePositioned": {
+      "type": "boolean",
+      "default": false,
+      "description": "仅当对象用作剪裁路径时有意义。如果为 true，剪裁路径的 top 和 left 将相对于画布，不受对象变换的影响。这将使剪裁路径相对于画布，仅剪裁特定对象。警告：此功能为测试版，可能更改或重命名。自 2.4.0 起。"
+    },
+    "aCoords": {
+      "type": ["object", "null"],
+      "default": null,
+      "description": "描述对象在场景坐标中的角点位置。坐标由以下属性派生：left、top、width、height、scaleX、scaleY、skewX、skewY、angle、strokeWidth。坐标不受视口变化影响。使用 setCoords 更新坐标。无需更新即可通过 calcACoords 计算。"
+    },
+    "angle": {
+      "type": "number",
+      "default": 0,
+      "description": "对象的旋转角度（以度为单位）。"
+    },
+    "backgroundColor": {
+      "type": ["string", "null"],
+      "default": null,
+      "description": "对象的背景颜色，接受 CSS 颜色值。"
+    },
+    "borderColor": {
+      "type": "string",
+      "default": "rgb(178,204,255)",
+      "description": "对象激活时控制边框的颜色。"
+    },
+    "borderDashArray": {
+      "type": ["array", "null"],
+      "items": { "type": "number" },
+      "default": null,
+      "description": "指定对象边框的虚线模式数组（需 hasBorder 为 true）。自 1.6.2 起。"
+    },
+    "borderOpacityWhenMoving": {
+      "type": "number",
+      "default": 0.4,
+      "description": "对象激活并移动时控制边框的透明度。"
+    },
+    "borderScaleFactor": {
+      "type": "number",
+      "default": 1,
+      "description": "对象边框（选择框和控制点描边）的缩放因子。数值越大，边框越粗，默认值为 1，等同于边框和控制点的描边宽度。如果需要分离边框和控制点的描边宽度，需自定义渲染函数。"
+    },
+    "centeredRotation": {
+      "type": "boolean",
+      "default": false,
+      "description": "若为 true，对象将围绕其中心旋转；若为 false，将围绕 originX 和 originY 定义的原点旋转。此属性在变换期间会被忽略，如果画布已将 centeredRotation 设置为 true。对象的 rotate 方法始终考虑此属性，而非画布的设置。自 1.3.4 起。"
+    },
+    "centeredScaling": {
+      "type": "boolean",
+      "default": false,
+      "description": "若为 true，对象在通过控制点缩放时将使用中心点作为变换原点。自 1.3.4 起。"
+    },
+    "clipPath": {
+      "type": ["object", "null"],
+      "default": null,
+      "description": "一个 fabricObject，定义无描边的剪裁区域，使用其形状填充为黑色。剪裁路径对象在对象渲染后生效，上下文置于对象缓存画布的中心。如果希望剪裁路径的 0,0 点与对象中心对齐，使用 clipPath.originX/Y 设置为 'center'。"
+    },
+    "clipPathId": {
+      "type": ["string", "null"],
+      "default": null,
+      "description": "当对象作为剪裁路径导出为 SVG 时，需要一个引用。此引用是 fabric 命名空间中的 UID，临时存储于此。"
+    },
+    "controls": {
+      "type": ["object", "null"],
+      "default": null,
+      "description": "存储对象的控制点，由 default_controls.js 添加。"
+    },
+    "cornerColor": {
+      "type": "string",
+      "default": "rgb(178,204,255)",
+      "description": "对象激活时控制角点的颜色。"
+    },
+    "cornerDashArray": {
+      "type": ["array", "null"],
+      "items": { "type": "number" },
+      "default": null,
+      "description": "指定对象控制点虚线模式的数组（需 hasBorder 为 true）。自 1.6.2 起。"
+    },
+    "cornerSize": {
+      "type": "number",
+      "default": 13,
+      "description": "对象控制角点的大小（以像素为单位）。"
+    },
+    "cornerStrokeColor": {
+      "type": "string",
+      "default": "",
+      "description": "对象激活且 transparentCorners 为 false 时控制角点的描边颜色。自 1.6.2 起。"
+    },
+    "cornerStyle": {
+      "type": "string",
+      "enum": ["circle", "rect"],
+      "default": "rect",
+      "description": "控制点的样式，'rect' 或 'circle'。此属性已弃用。未来将有标准控制点渲染，可通过控制 API 替换为其他样式。自 1.6.2 起。"
+    },
+    "dirty": {
+      "type": "boolean",
+      "default": true,
+      "description": "若为 true，下次渲染时将重新渲染对象的缓存。自 1.7.0 起。"
+    },
+    "evented": {
+      "type": "boolean",
+      "default": true,
+      "description": "若为 false，对象无法成为事件的目标，所有事件将穿透它。自 1.3.4 起。"
+    },
+    "excludeFromExport": {
+      "type": "boolean",
+      "default": false,
+      "description": "若为 true，对象不会在 OBJECT/JSON 中导出。自 1.6.3 起。"
+    },
+    "fill": {
+      "anyOf": [
+        { "type": "string" },
+        { "type": "object" },
+        { "type": ["string", "null"] }
+      ],
+      "default": "rgb(0,0,0)",
+      "description": "对象的填充颜色，接受 CSS 颜色值。"
+    },
+    "fillRule": {
+      "type": "string",
+      "default": "nonzero",
+      "description": "用于填充对象的填充规则，接受值为 nonzero 或 evenodd。向后兼容性说明：此属性在 v1.4.12 之前用于设置 globalCompositeOperation，现应使用 globalCompositeOperation。"
+    },
+    "flipX": {
+      "type": "boolean",
+      "default": false,
+      "description": "若为 true，对象将水平翻转渲染。"
+    },
+    "flipY": {
+      "type": "boolean",
+      "default": false,
+      "description": "若为 true，对象将垂直翻转渲染。"
+    },
+    "globalCompositeOperation": {
+      "type": "string",
+      "default": null,
+      "description": "用于画布的全局合成操作规则。"
+    },
+    "hasBorders": {
+      "type": "boolean",
+      "default": true,
+      "description": "若为 false，对象的控制边框不会渲染。"
+    },
+    "hasControls": {
+      "type": "boolean",
+      "default": true,
+      "description": "若为 false，对象的控制点不显示且无法用于操作对象。"
+    },
+    "height": {
+      "type": ["number", "null"],
+      "default": null,
+      "description": "对象的高度。"
+    },
+    "hoverCursor": {
+      "type": ["string", "null"],
+      "default": null,
+      "description": "鼠标悬停在画布上的对象时的默认光标值。"
+    },
+    "includeDefaultValues": {
+      "type": "boolean",
+      "default": true,
+      "description": "若为 false，对象的默认值不会包含在序列化中。"
+    },
+    "inverted": {
+      "type": "boolean",
+      "default": false,
+      "description": "仅当对象用作剪裁路径时有意义。若为 true，剪裁路径将使对象剪裁到剪裁路径外部。自 2.4.0 起。"
+    },
+    "isMoving": {
+      "type": ["boolean", "null"],
+      "default": null,
+      "description": "内部布尔值，标记对象是否处于移动操作中。"
+    },
+    "left": {
+      "type": "number",
+      "default": 0,
+      "description": "对象的左边位置。默认相对于对象的左边，可通过设置 originX 更改。"
+    },
+    "lockMovementX": {
+      "type": "boolean",
+      "default": false,
+      "description": "若为 true，对象的水平移动被锁定。"
+    },
+    "lockMovementY": {
+      "type": "boolean",
+      "default": false,
+      "description": "若为 true，对象的垂直移动被锁定。"
+    },
+    "lockRotation": {
+      "type": "boolean",
+      "default": false,
+      "description": "若为 true，对象的旋转被锁定。"
+    },
+    "lockScalingFlip": {
+      "type": "boolean",
+      "default": false,
+      "description": "若为 true，对象不能通过缩放到负值进行翻转。"
+    },
+    "lockScalingX": {
+      "type": "boolean",
+      "default": false,
+      "description": "若为 true，对象的水平缩放被锁定。"
+    },
+    "lockScalingY": {
+      "type": "boolean",
+      "default": false,
+      "description": "若为 true，对象的垂直缩放被锁定。"
+    },
+    "lockSkewingX": {
+      "type": "boolean",
+      "default": false,
+      "description": "若为 true，对象的水平倾斜被锁定。"
+    },
+    "lockSkewingY": {
+      "type": "boolean",
+      "default": false,
+      "description": "若为 true，对象的垂直倾斜被锁定。"
+    },
+    "matrixCache": {
+      "type": ["object", "null"],
+      "default": null,
+      "description": "存储对象的完整变换矩阵的缓存。"
+    },
+    "minScaleLimit": {
+      "type": "number",
+      "default": 0,
+      "description": "对象的最小允许缩放值。"
+    },
+    "moveCursor": {
+      "type": ["string", "null"],
+      "default": null,
+      "description": "在画布上移动对象时的默认光标值。"
+    },
+    "noScaleCache": {
+      "type": "boolean",
+      "default": true,
+      "description": "若为 true，缩放期间不会更新缓存。缩放过多时图像可能出现块状，缩放结束时将以正确细节重新绘制。此设置与性能和应用相关，默认值为 true。自 1.7.0 起。"
+    },
+    "objectCaching": {
+      "type": "boolean",
+      "default": true,
+      "description": "若为 true，对象将在额外画布上缓存。若为 false，除非必要（如剪裁路径），对象不会缓存。默认值为 true。自 1.7.0 起。"
+    },
+    "oCoords": {
+      "type": ["object", "null"],
+      "default": null,
+      "description": "对象的控制点在视口坐标中的位置。由 Control#positionHandler 和 Control#calcCornerCoords 计算，取决于 padding。corner/touchCorner 描述形成控制点交互区域的 4 个点。用于绘制和定位控制点。"
+    },
+    "opacity": {
+      "type": "number",
+      "default": 1,
+      "description": "对象的透明度。"
+    },
+    "originX": {
+      "type": "string",
+      "enum": ["left", "center", "right"],
+      "default": "left",
+      "description": "对象的水平原点，接受值：'left'、'center' 或 'right'。"
+    },
+    "originY": {
+      "type": "string",
+      "enum": ["top", "center", "bottom"],
+      "default": "top",
+      "description": "对象的垂直原点，接受值：'top'、'center' 或 'bottom'。"
+    },
+    "ownMatrixCache": {
+      "type": ["object", "null"],
+      "default": null,
+      "description": "存储对象变换矩阵的缓存。"
+    },
+    "padding": {
+      "type": "number",
+      "default": 0,
+      "description": "对象与其控制边框之间的填充（以像素为单位）。"
+    },
+    "paintFirst": {
+      "type": "string",
+      "enum": ["fill", "stroke"],
+      "default": "fill",
+      "description": "决定先绘制填充还是描边，接受值：'fill' 或 'stroke'。"
+    },
+    "parent": {
+      "type": ["object", "null"],
+      "default": null,
+      "description": "对象的父级引用，用于在对象被添加到 ActiveSelection 时保留原始父级引用。"
+    },
+    "perPixelTargetFind": {
+      "type": "boolean",
+      "default": false,
+      "description": "若为 true，目标检测按像素进行。"
+    },
+    "rx": {
+      "type": "number",
+      "default": 0,
+      "description": "对象边框圆角的 x 半径。"
+    },
+    "ry": {
+      "type": "number",
+      "default": 0,
+      "description": "对象边框圆角的 y 半径。"
+    },
+    "scaleX": {
+      "type": "number",
+      "default": 1,
+      "description": "对象的水平缩放因子。"
+    },
+    "scaleY": {
+      "type": "number",
+      "default": 1,
+      "description": "对象的垂直缩放因子。"
+    },
+    "selectable": {
+      "type": "boolean",
+      "default": true,
+      "description": "若为 false，对象不可被选择。"
+    },
+    "shadow": {
+      "type": ["object", "null"],
+      "default": null,
+      "description": "应用于对象的阴影效果。"
+    },
+    "skewX": {
+      "type": "number",
+      "default": 0,
+      "description": "对象的水平倾斜角度。"
+    },
+    "skewY": {
+      "type": "number",
+      "default": 0,
+      "description": "对象的垂直倾斜角度。"
+    },
+    "stroke": {
+      "anyOf": [
+        { "type": "string" },
+        { "type": "object" }
+      ],
+      "default": "#000",
+      "description": "对象的描边颜色。"
+    },
+    "strokeDashArray": {
+      "type": ["array", "null"],
+      "items": { "type": "number" },
+      "default": null,
+      "description": "定义描边虚线模式的数组。"
+    },
+    "strokeDashOffset": {
+      "type": "number",
+      "default": 0,
+      "description": "开始绘制虚线的偏移量。"
+    },
+    "strokeLineCap": {
+      "type": "string",
+      "enum": ["butt", "round", "square"],
+      "default": "butt",
+      "description": "描边的线帽样式，接受值：'butt'、'round' 或 'square'。"
+    },
+    "strokeLineJoin": {
+      "type": "string",
+      "enum": ["miter", "round", "bevel"],
+      "default": "miter",
+      "description": "描边的线连接样式，接受值：'miter'、'round' 或 'bevel'。"
+    },
+    "strokeMiterLimit": {
+      "type": "number",
+      "default": 4,
+      "description": "描边连接的斜接限制。"
+    },
+    "strokeWidth": {
+      "type": "number",
+      "default": 1,
+      "description": "描边的宽度。"
+    },
+    "top": {
+      "type": "number",
+      "default": 0,
+      "description": "对象的顶部位置。默认相对于对象的顶部，可通过设置 originY 更改。"
+    },
+    "transparentCorners": {
+      "type": "boolean",
+      "default": true,
+      "description": "若为 false，控制点不会渲染为透明矩形。"
+    },
+    "transformMatrix": {
+      "type": "array",
+      "items": { "type": "number" },
+      "default": null,
+      "description": "变换矩阵。"
+    },
+    "visible": {
+      "type": "boolean",
+      "default": true,
+      "description": "若为 false，对象的渲染不受影响，但对象不会被渲染。"
+    },
+    "width": {
+      "type": ["number", "null"],
+      "default": null,
+      "description": "对象的宽度。"
+    }
+  },
+  "additionalProperties": false
+}

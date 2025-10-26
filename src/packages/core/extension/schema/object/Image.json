@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Image",
+  "description": "基于 Fabric.js 文档的 Image 类独有属性 JSON Schema，排除 FabricObject 中的属性",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": ["image"],
+      "default": "image",
+      "description": "对象的类型，固定为 'image'，用于标识图像对象。"
+    },
+    "crossOrigin": {
+      "type": ["string", "null"],
+      "enum": [null, "", "anonymous", "use-credentials"],
+      "default": null,
+      "description": "图像的跨域设置，接受值为 null、''（空字符串）、'anonymous' 或 'use-credentials'，用于处理跨域图像加载。"
+    },
+    "filters": {
+      "type": ["array", "null"],
+      "items": {
+        "type": "object",
+        "description": "图像滤镜对象，定义应用于图像的滤镜效果。"
+      },
+      "default": null,
+      "description": "图像滤镜数组，包含应用于图像的滤镜对象，如亮度、对比度等滤镜。"
+    },
+    "src": {
+      "type": ["string", "null"],
+      "default": null,
+      "description": "图像的源 URL 或数据 URL，用于加载图像内容。"
+    }
+  },
+  "required": ["type"],
+  "additionalProperties": false
+}

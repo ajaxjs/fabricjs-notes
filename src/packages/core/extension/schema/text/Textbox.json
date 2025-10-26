@@ -1,0 +1,27 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "title": "Textbox Properties",
+    "description": "基于 IText 的文本框类允许用户调整文本矩形的大小并自动换行。文本框的 Y 轴缩放比例已锁定，用户只能更改宽度。高度会根据换行情况自动调整。",
+    "properties": {
+        "dynamicMinWidth": {
+            "type": "number",
+            "default": 0,
+            "description": "文本框的最小宽度（以像素为单位），会根据内容动态调整"
+        },
+        "splitByGrapheme": {
+            "type": "boolean",
+            "default": false,
+            "description": "设置为 `true` 时，文本将按字素（grapheme）分割，而不是按字符分割"
+        },
+        "textLines": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "default": [],
+            "description": "文本行数组，表示文本框中的每一行文本"
+        }
+    },
+    "additionalProperties": false
+}

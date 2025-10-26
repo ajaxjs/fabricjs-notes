@@ -1,0 +1,365 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "title": "FabricText Properties",
+    "description": "JSON Schema for FabricText class properties",
+    "properties": {
+        "angle": {
+            "type": "number",
+            "default": 0,
+            "description": "文本对象的旋转角度（以度为单位）"
+        },
+        "backgroundColor": {
+            "type": [
+                "string",
+                "object"
+            ],
+            "default": "rgba(0,0,0,0)",
+            "description": "文本对象的背景颜色。颜色可以定义为十六进制或 rgb(a) 格式"
+        },
+        "borderColor": {
+            "type": [
+                "string",
+                "object"
+            ],
+            "default": "rgba(102,153,255,0.75)",
+            "description": "文本对象的边框颜色。颜色可以定义为十六进制或 rgb(a) 格式"
+        },
+        "borderDashArray": {
+            "type": "array",
+            "items": {
+                "type": "number"
+            },
+            "default": [
+                3,
+                2
+            ],
+            "description": "指定文本边框的虚线长度和间隙长度的数组"
+        },
+        "borderScaleFactor": {
+            "type": "number",
+            "default": 5,
+            "description": "缩放时的边框缩放因子"
+        },
+        "borderStrokeWidth": {
+            "type": "number",
+            "default": 1,
+            "description": "对象周围边框的宽度（以像素为单位）"
+        },
+        "bottom": {
+            "type": "number",
+            "default": 0,
+            "description": "相对于父组或画布的底部位置"
+        },
+        "cacheProperties": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "default": [],
+            "description": "检查对象缓存是否需要刷新的属性列表"
+        },
+        "canvas": {
+            "type": [
+                "object",
+                "null"
+            ],
+            "default": null,
+            "description": "对象添加到画布的引用"
+        },
+        "charSpacing": {
+            "type": "number",
+            "default": 0,
+            "description": "字符之间的额外空间（以像素为单位）"
+        },
+        "clipPath": {
+            "type": [
+                "object",
+                "null"
+            ],
+            "default": null,
+            "description": "如果设置，将将文本画布剪裁到对象的形状"
+        },
+        "color": {
+            "type": [
+                "string",
+                "object"
+            ],
+            "default": "rgb(0, 0, 0)",
+            "description": "文本颜色，以十六进制或 rgb 格式"
+        },
+        "deltaY": {
+            "type": "number",
+            "default": 0,
+            "description": "指针的 `y` 坐标的最后记录值（在 `resetTransform()` 时设置为 0）"
+        },
+        "dir": {
+            "type": "string",
+            "default": "ltr",
+            "description": "HTML 方向性，接受 `ltr`（从左到右）或 `rtl`（从右到左）"
+        },
+        "display": {
+            "type": "string",
+            "default": "block",
+            "description": "文本渲染类型。可能值为 `block` 或 `inline`"
+        },
+        "fill": {
+            "type": [
+                "string",
+                "object"
+            ],
+            "default": "rgb(0, 0, 0)",
+            "description": "填充颜色。颜色可以定义为十六进制或 rgb(a) 格式"
+        },
+        "fontFamily": {
+            "type": "string",
+            "default": "Times New Roman",
+            "description": "文本的字体家族，例如 'Times New Roman'"
+        },
+        "fontSize": {
+            "type": "number",
+            "default": 40,
+            "description": "字体大小（以像素为单位，除非在 fontSize 单位中指定）"
+        },
+        "fontStyle": {
+            "type": "string",
+            "default": "normal",
+            "enum": [
+                "normal",
+                "italic"
+            ],
+            "description": "可以是 `normal` 或 `italic`"
+        },
+        "fontVariant": {
+            "type": "string",
+            "default": "normal",
+            "enum": [
+                "normal",
+                "small-caps"
+            ],
+            "description": "可以是 `normal` 或 `small-caps`"
+        },
+        "fontWeight": {
+            "type": [
+                "string",
+                "number"
+            ],
+            "default": "normal",
+            "description": "可以是 `normal`、`bold` 或 `100`、`200`、...、`800`"
+        },
+        "globalCompositeOperation": {
+            "type": "string",
+            "default": "source-over",
+            "description": "渲染对象时如何设置 globalCompositeOperation 属性"
+        },
+        "height": {
+            "type": "number",
+            "default": 0,
+            "description": "文本对象的高度"
+        },
+        "left": {
+            "type": "number",
+            "default": 0,
+            "description": "相对于父组或画布的左侧位置"
+        },
+        "lineHeight": {
+            "type": "number",
+            "default": 1.16,
+            "description": "单行文本的高度（以像素为单位，除非在 fontSize 单位中指定）"
+        },
+        "lineSpacing": {
+            "type": "number",
+            "default": 0,
+            "description": "行之间的额外空间（以像素为单位）"
+        },
+        "lockMovementX": {
+            "type": "boolean",
+            "default": false,
+            "description": "设置为 `true` 时，用户无法选择或移动对象"
+        },
+        "lockMovementY": {
+            "type": "boolean",
+            "default": false,
+            "description": "设置为 `true` 时，用户无法选择或移动对象"
+        },
+        "lockRotation": {
+            "type": "boolean",
+            "default": false,
+            "description": "设置为 `true` 时，用户无法旋转对象"
+        },
+        "lockScalingX": {
+            "type": "boolean",
+            "default": false,
+            "description": "设置为 `true` 时，用户无法缩放对象"
+        },
+        "lockScalingY": {
+            "type": "boolean",
+            "default": false,
+            "description": "设置为 `true` 时，用户无法缩放对象"
+        },
+        "lockSkewingX": {
+            "type": "boolean",
+            "default": false,
+            "description": "设置为 `true` 时，用户无法倾斜对象"
+        },
+        "lockSkewingY": {
+            "type": "boolean",
+            "default": false,
+            "description": "设置为 `true` 时，用户无法倾斜对象"
+        },
+        "lockUniScaling": {
+            "type": "boolean",
+            "default": false,
+            "description": "设置为 `true` 时，用户无法均匀缩放对象"
+        },
+        "minScaleLimit": {
+            "type": "number",
+            "default": 0,
+            "description": "对象的缩放限制（数字）"
+        },
+        "originX": {
+            "type": "string",
+            "default": "left",
+            "enum": [
+                "left",
+                "center",
+                "right"
+            ],
+            "description": "对象变换的水平原点（\"left\"、\"right\" 或 \"center\" 之一）"
+        },
+        "originY": {
+            "type": "string",
+            "default": "top",
+            "enum": [
+                "top",
+                "center",
+                "bottom"
+            ],
+            "description": "对象变换的垂直原点（\"top\"、\"bottom\" 或 \"center\" 之一）"
+        },
+        "path": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "default": null,
+            "description": "文本跟随的路径"
+        },
+        "pathAlign": {
+            "type": "string",
+            "default": "adherent",
+            "enum": [
+                "congruent",
+                "adherent",
+                "accompanying"
+            ],
+            "description": "指定文本沿路径的位置。可能值为 \"congruent\"、\"adherent\"、\"accompanying\""
+        },
+        "pathEnd": {
+            "type": "number",
+            "default": 1,
+            "description": "路径的 0.0 - 1.0"
+        },
+        "pathStart": {
+            "type": "number",
+            "default": 0,
+            "description": "路径的 0.0 - 1.0"
+        },
+        "perPixelTargetFind": {
+            "type": "boolean",
+            "default": false,
+            "description": "设置为 `true` 时，指针目标在对象中搜索，而不是在对象列表中"
+        },
+        "selectable": {
+            "type": "boolean",
+            "default": true,
+            "description": "设置为 `false` 时，对象不可选择"
+        },
+        "shadow": {
+            "type": [
+                "object",
+                "null"
+            ],
+            "default": null,
+            "description": "表示此对象阴影的阴影对象。如果尝试设置字符串，它将被解析为 SVG 阴影对象"
+        },
+        "statefullCache": {
+            "type": "boolean",
+            "default": false,
+            "description": "设置为 `true` 时，缓存包含对象的状态（不仅仅是视觉属性）"
+        },
+        "statefullCacheProperties": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "default": [],
+            "description": "检查对象状态缓存是否需要刷新的属性列表"
+        },
+        "styles": {
+            "type": "object",
+            "default": {},
+            "description": "单个字符、单个段落或整个文本的样式"
+        },
+        "text": {
+            "type": "string",
+            "default": "",
+            "description": "要渲染的文本字符串"
+        },
+        "textAlign": {
+            "type": "string",
+            "default": "left",
+            "enum": [
+                "left",
+                "center",
+                "right",
+                "justify"
+            ],
+            "description": "文本对齐。可能值为 \"left\"、\"center\"、\"right\"、\"justify\""
+        },
+        "textBackgroundColor": {
+            "type": [
+                "string",
+                "object"
+            ],
+            "default": "rgba(0,0,0,0)",
+            "description": "文本对象的背景颜色。颜色可以定义为十六进制或 rgb(a) 格式"
+        },
+        "top": {
+            "type": "number",
+            "default": 0,
+            "description": "相对于父组或画布的顶部位置"
+        },
+        "transformMatrix": {
+            "type": "array",
+            "items": {
+                "type": "number"
+            },
+            "default": [
+                1,
+                0,
+                0,
+                1,
+                0,
+                0
+            ],
+            "description": "表示变换矩阵的数组"
+        },
+        "type": {
+            "type": "string",
+            "default": "fabric.Text",
+            "description": "对象类型（例如 \"circle\" 或 \"rect\" 等）。"
+        },
+        "visible": {
+            "type": "boolean",
+            "default": true,
+            "description": "设置为 `false` 时，对象可见"
+        },
+        "width": {
+            "type": "number",
+            "default": 0,
+            "description": "文本对象的宽度"
+        }
+    },
+    "additionalProperties": false
+}
