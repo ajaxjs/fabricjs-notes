@@ -28,7 +28,9 @@ export class FabricCanvas extends Canvas {
 		FabricObject.ownDefaults.cornerStrokeColor = '#c0c0c0'
 		// 控制点是否透明，false表示不透明
 		FabricObject.ownDefaults.transparentCorners = false
-		
+
+
+
 		// 画布变化事件
 		const changeHandler = (e: any) => this.fire('canvas:change', e)
 		// 对象修改事件
@@ -37,6 +39,7 @@ export class FabricCanvas extends Canvas {
 		this.on('object:added', (e) => changeHandler({ ...e, action: 'add' }));
 		// 对象移除事件
 		this.on('object:removed', (e) => changeHandler({ ...e, action: 'remove' }));
+
 	}
 	get activeTool() {
 		return this._activeTool

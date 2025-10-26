@@ -1,14 +1,25 @@
-import { Rect, type RectProps, Circle, type CircleProps, Triangle, type FabricObjectProps } from 'fabric'
-import { Circle as IconCircle, Square as IconSquare, Triangle as IconTriangle } from 'lucide-vue-next'
+import {
+    classRegistry,
+    FabricObject,
+    type RectProps,
+    type CircleProps,
+    type FabricObjectProps,
+    type EllipseProps
+} from 'fabric'
+import {
+    Circle as IconCircle, Square as IconSquare, Triangle as IconTriangle,
+    Hexagon as IconHexagon,
+    Slash as IconSlash,
+    Star as IconStar,
+} from 'lucide-vue-next'
+import IconEllipse from '../assets/IconEllipse.vue'
+import * as objectsDefaults from '../../core/configs/object'
+import { createCircle, createRect, createTriangle, createPolygon, createEllipse, createStar } from '../../core/extension/factory'
 
 
-/**
- * 待优化: 这种无法旋转和绽放
- */
-
-const DEFAULT_PROPS = {
-    left: 100,
-    top: 100,
+function createShape(type: string, props?: Record<string, any>) {
+    const ShapeClass = classRegistry.getClass<typeof FabricObject>(type);
+    return new ShapeClass(props);
 }
 
 export function getObjectMap() {
@@ -16,35 +27,46 @@ export function getObjectMap() {
         {
             name: '矩形',
             icon: IconSquare,
-            creator: (props?: RectProps) => new Rect({
-                ...DEFAULT_PROPS,
-                width: 100,
-                height: 100,
-                fill: '#666',
-                ...props
-            }),
+            creator: createRect,
         },
         {
             name: '圆形',
             icon: IconCircle,
-            creator: (props?: CircleProps) => new Circle({
-                ...DEFAULT_PROPS,
-                radius: 50,
-                rx: 50,
-                ry: 50,
-                fill: '#666',
-                ...props
-            }),
+            creator: createCircle,
         },
         {
             name: '三角形',
             icon: IconTriangle,
-            creator: (props?: FabricObjectProps) => new Triangle({
-                ...DEFAULT_PROPS,
-                radius: 50,
-                fill: '#666',
-                ...props
-            }),
-        }
+            creator: createTriangle,
+        },
+        {
+            name: '椭圆',
+            icon: IconEllipse,
+            creator: createEllipse,
+        },
+        {
+            name: '多边形',
+            icon: IconHexagon,
+            creator: createPolygon,
+        },
+        {
+            name: '星形',
+            icon: IconStar,
+            creator: createStar,
+        },
     ]
 }
+
+/**
+ * 
+        {
+            name: '直线',
+            icon: IconSlash,
+            creator: (props?: FabricObjectProps) => createShape('line', props),
+        },
+        {
+            name: '文字',
+            icon: IconEllipse,
+            creator: (props?: any) => {},
+        },
+ */
