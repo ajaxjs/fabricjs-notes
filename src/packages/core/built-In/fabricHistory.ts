@@ -36,37 +36,36 @@ export class FabricHistory implements CorePluginTemp {
     }
 
     private _initHistory() {
-        this.saveState({action:'init'})
+        this.saveState({ action: 'init' })
     }
 
     // 监听画布变化事件
     protected _canvasChange() {
         const { canvas } = this;
+        // 防抖：画面变化保存
         this.changeHandler = debounce((e: any) => {
-            console.log('---canvas:change',e);
-            
-            this.saveState.call(this,e)
+            this.saveState.call(this, e)
         }, 300)
         // 对象修改事件
         canvas.on('object:modified', this.changeHandler);
         // 对象添加事件
-        canvas.on('object:added', (e)=>this.changeHandler({...e,action:'add'}));
+        canvas.on('object:added', (e) => this.changeHandler({ ...e, action: 'add' }));
         // 对象移除事件
-        canvas.on('object:removed', (e)=>this.changeHandler({...e,action:'remove'}));
+        canvas.on('object:removed', (e) => this.changeHandler({ ...e, action: 'remove' }));
     }
 
     // 保存当前状态
-    private saveState({action,target}:historyEvent) {
+    private saveState({ action, target }: historyEvent) {
         if (this.isHistoryAction) {
             this.isHistoryAction = false;
             return;
         }
         // 删除currentIndex之后的记录
         const historLen = this.historyStack.length
-        if(this.currentIndex < historLen - 1){
-            this.historyStack.splice(this.currentIndex,historLen)
+        if (this.currentIndex < historLen - 1) {
+            this.historyStack.splice(this.currentIndex, historLen)
         }
-        
+
         const state = this.canvas.toJSON();
         const item: historyItem = {
             action,
@@ -81,12 +80,12 @@ export class FabricHistory implements CorePluginTemp {
             this.historyStack.shift();
             this.currentIndex--;
         }
-        
+
     }
 
     // 定位到指定历史记录索引
     locaTo(index: number) {
-        const item: historyItem|undefined = this.historyStack[index];
+        const item: historyItem | undefined = this.historyStack[index];
         if (!item) return;
 
         //console.log('+++isHistoryAction:true');

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { Toggle } from "@/components/ui/toggle"
 import { useSettingStore } from '../stores/index.ts'
 import { sideNavItems } from './useSideNav.ts'
@@ -25,7 +25,7 @@ function onClickNav(item: any) {
                 <small>{{ item.label }}</small>
             </Toggle>
         </div>
-        <div class="tool-panel relative z-10">
+        <ScrollArea class="tool-panel relative z-10">
             <Transition name="sidebar">
                 <div v-if="leftSideVisib" class="tool-panel-inner w-80 overflow-hidden px-2">
                     <template v-for="(item) in sideNavItems">
@@ -35,7 +35,7 @@ function onClickNav(item: any) {
                     </template>
                 </div>
             </Transition>
-        </div>
+        </ScrollArea>
         <div class="absolute top-1/2 left-[100%] -translate-y-1/2" @click="leftSideVisib = !leftSideVisib">
             <IconExpend :expended="leftSideVisib" />
         </div>
