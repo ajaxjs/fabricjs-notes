@@ -1,10 +1,21 @@
 <script setup lang="ts">
 import { onEditorReady } from '@/packages/core'
 import { Editor, HeadBar } from '@/packages/editor'
-import { Rect, Polygon, Circle, Triangle } from 'fabric'
+//import { Rect, Polygon, Circle, Triangle, Path } from 'fabric'
+//import { blob10 } from '../src/packages/core/extension/factory/maker/shape-path.js'
 
 
-onEditorReady(({ canvas }) => {
+onEditorReady(({ /*canvas*/ }) => {
+	// const pathData = blob10({ width: 100, height: 100 });
+	// console.log(pathData);
+	// const path = new Path(pathData.path, {
+	// 	//stroke: 'red',
+	// 	fill: 'lightgreen',
+	// 	left: 100,
+	// 	top: 100,
+	// })
+	// canvas.add(path)
+
 	// 创建三角形
 	// const triangle = new Triangle({
 	// 	left: 100,

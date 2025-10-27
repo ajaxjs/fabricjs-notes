@@ -1,6 +1,6 @@
 import hotkeys from 'hotkeys-js';
 import { Canvas, classRegistry, FabricObject } from 'fabric';
-import type { TOptions, CanvasOptions, TSVGExportOptions, TSVGReviver } from 'fabric';
+import type { TOptions, CanvasOptions, TSVGExportOptions, TSVGReviver, DropEventData } from 'fabric';
 import type { CorePluginClass } from '../interface/core'
 import type { IHotkey, IWheelTool, ICursorTool } from '../interface';
 import { isCollection } from '../utils/check'
@@ -14,6 +14,8 @@ export class FabricCanvas extends Canvas {
 	protected _activeTool: ICursorTool = 'move';
 	// 滚轮工具
 	wheelTool: IWheelTool = 'scroll';
+	// 拖拽元素临时存放
+	protected _dropPort: FabricObject | null = null;
 	constructor(el: string | HTMLCanvasElement, options: TOptions<CanvasOptions>) {
 		super(el, options)
 		// 导入自定义属性
@@ -29,8 +31,6 @@ export class FabricCanvas extends Canvas {
 		// 控制点是否透明，false表示不透明
 		FabricObject.ownDefaults.transparentCorners = false
 
-
-
 		// 画布变化事件
 		const changeHandler = (e: any) => this.fire('canvas:change', e)
 		// 对象修改事件
@@ -40,6 +40,26 @@ export class FabricCanvas extends Canvas {
 		// 对象移除事件
 		this.on('object:removed', (e) => changeHandler({ ...e, action: 'remove' }));
 
+		// 绑定drop事件
+		this.on('dragover', (e) => {
+			e.e.preventDefault();  // 允许放置  
+			if (e.e.dataTransfer) {
+				e.e.dataTransfer.dropEffect = 'copy';  // 可选:设置光标样式
+
+			}
+		});
+		// drop 放置元素到画布
+		this.on('drop', (e) => {
+			const obj = this._dropPort;
+			if (obj instanceof FabricObject) {
+				obj.set({
+					left: e.scenePoint.x,
+					top: e.scenePoint.y,
+				})
+				this.add(obj);
+				this.renderAll();
+			}
+		})
 	}
 	get activeTool() {
 		return this._activeTool
@@ -69,6 +89,12 @@ export class FabricCanvas extends Canvas {
 			//this.setCursor('default')
 		}
 		this._activeTool = name
+	}
+	get dropPort(): FabricObject | null {
+		return this._dropPort
+	}
+	set dropPort(obj: FabricObject | null) {
+		this._dropPort = obj
 	}
 	// 重写添加对象
 	override add(...objects: FabricObject[]): number {

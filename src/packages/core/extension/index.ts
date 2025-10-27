@@ -1,1 +1,1 @@
-export { createShape } from './factory/ShapeFactory'
+export * as factory from './factory'

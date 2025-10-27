@@ -35,7 +35,7 @@ export function onEditorReady(callback: EditorReadyCallback, instanceId?: string
     if (editorInstances[instanceId]) {
         entry.callback(editorInstances![instanceId]!);
     }
-    
+
 }
 
 class FabricCore {
@@ -106,7 +106,6 @@ class FabricCore {
         this.plubinMap.forEach(([plugin, options]) => this._pluginInstaller(plugin, options))
         //initAligningGuidelines(canvas)
 
-        
         // 存储实例
         editorInstances[this.id] = this as FabricCore;
         // 调用所有注册的editorReady回调函数

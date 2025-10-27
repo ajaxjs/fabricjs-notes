@@ -14,7 +14,11 @@ import {
 } from 'lucide-vue-next'
 import IconEllipse from '../assets/IconEllipse.vue'
 import * as objectsDefaults from '../../core/configs/object'
-import { createCircle, createRect, createTriangle, createPolygon, createEllipse, createStar } from '../../core/extension/factory'
+import {factory} from '../../core/index.ts'
+console.log('customShapes',factory.CustomShape);
+console.log('customShapes.arc',factory.CustomShape.arc({width:100,height:100,fill:'green'}).toSVG());
+
+
 
 
 function createShape(type: string, props?: Record<string, any>) {
@@ -27,32 +31,33 @@ export function getObjectMap() {
         {
             name: '矩形',
             icon: IconSquare,
-            creator: createRect,
+            //creator: createRect,
+            creator: (props?: RectProps) => factory.CustomShape.arc({width:100,height:100,fill:'green'}),
         },
         {
             name: '圆形',
             icon: IconCircle,
-            creator: createCircle,
+            //creator: createCircle,
         },
         {
             name: '三角形',
             icon: IconTriangle,
-            creator: createTriangle,
+            //creator: createTriangle,
         },
         {
             name: '椭圆',
             icon: IconEllipse,
-            creator: createEllipse,
+            //creator: createEllipse,
         },
         {
             name: '多边形',
             icon: IconHexagon,
-            creator: createPolygon,
+            //creator: createPolygon,
         },
         {
             name: '星形',
             icon: IconStar,
-            creator: createStar,
+            //creator: createStar,
         },
     ]
 }
