@@ -4,7 +4,6 @@ import { onEditorReady, } from '../../../core'
 let canvas: any = null;
 onEditorReady((editor) => {
     canvas = editor.canvas;
-
 });
 const props = defineProps({
     name: {
