@@ -43,7 +43,7 @@ onFetchResponse((res) => {
 
 <template>
     <div class="flex justify-end p-2 gap-1">
-        <Select v-model="params.category" :options="imgTypes" label="图片类型" class="w-[4em]" />
+        <Select v-model="params.category" :options="imgTypes" label="分类" class="min-w-[6em]" />
         <Input v-model="params.q" placeholder="搜索关键字" class="w-full" />
         <Button variant="outline" @click="execute">搜索</Button>
     </div>
