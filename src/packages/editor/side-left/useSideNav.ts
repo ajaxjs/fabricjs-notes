@@ -1,10 +1,10 @@
-import { Grid2x2Plus, PencilRuler,Image, Wallpaper, Type } from 'lucide-vue-next';
+import { Grid2x2Plus, PencilRuler,Image, Wallpaper, Type, Shapes } from 'lucide-vue-next';
 
 import PanelAdd from './PanelAdd.vue'
 import PanelDesign from './PanelDesign.vue'
 import PanelMaterial from './PanelMaterial.vue'
-import PanelBackground from './PanelBackground.vue'
 import PanelText from './PanelText.vue'
+import PanelShape from './PanelShape.vue'
 
 export const sideNavItems = [
     {
@@ -23,14 +23,14 @@ export const sideNavItems = [
         component: PanelText
     },
     {
+        icon: Shapes,
+        label: '形状',
+        component: PanelShape
+    },
+    {
         icon: Image,
         label: '素材',
         component: PanelMaterial
-    },
-    {
-        icon: Wallpaper,
-        label: '背景',
-        component: PanelBackground
     },
 ]
 

@@ -1,6 +1,6 @@
 import hotkeys from 'hotkeys-js';
 import { Canvas, classRegistry, FabricObject } from 'fabric';
-import type { TOptions, CanvasOptions, TSVGExportOptions, TSVGReviver, DropEventData } from 'fabric';
+import type { TOptions, CanvasOptions, TSVGExportOptions, TSVGReviver } from 'fabric';
 import type { CorePluginClass } from '../interface/core'
 import type { IHotkey, IWheelTool, ICursorTool } from '../interface';
 import { isCollection } from '../utils/check'
