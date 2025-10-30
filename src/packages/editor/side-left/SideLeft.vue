@@ -27,7 +27,7 @@ function onClickNav(item: any) {
         </div>
         <ScrollArea class="tool-panel relative z-10">
             <Transition name="sidebar">
-                <div v-if="leftSideVisib" class="tool-panel-inner w-80 overflow-hidden px-2">
+                <div v-if="leftSideVisib" class="tool-panel-inner w-80 overflow-hidden">
                     <template v-for="(item) in sideNavItems">
                         <KeepAlive>
                             <component v-if="settingStore.leftSideActive === item.label" :is="item.component" />

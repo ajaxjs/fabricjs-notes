@@ -1,4 +1,4 @@
-import { Grid2x2Plus, PencilRuler,Image, Wallpaper, Type, Shapes } from 'lucide-vue-next';
+import { Grid2x2Plus, PencilRuler,Image, Type, Shapes } from 'lucide-vue-next';
 
 import PanelAdd from './PanelAdd.vue'
 import PanelDesign from './PanelDesign.vue'
