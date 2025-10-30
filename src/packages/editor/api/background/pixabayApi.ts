@@ -42,7 +42,7 @@ export type PixabayItem = {
     imageSize: number;
 };
 
-type PixabayResponse = {
+export type PixabayResponse = {
     total: number,
     totalHits: number,
     hits: PixabayItem[]
@@ -55,6 +55,6 @@ const instance = axios.create({
     timeout: 30000,
 })
 
-export function getPixabayApi(params: any) {
-    return useAxios('/', { params }, instance)
+export function getPixabayApi(params: PixabayParams) {
+    return instance.get<PixabayResponse>('/', { params }).then(res => res.data)
 }
