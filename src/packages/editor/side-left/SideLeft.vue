@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Toggle } from "@/components/ui/toggle"
 import { useSettingStore } from '../stores/index.ts'
 import { sideNavItems } from './useSideNav.ts'
@@ -25,17 +24,15 @@ function onClickNav(item: any) {
                 <small>{{ item.label }}</small>
             </Toggle>
         </div>
-        <ScrollArea class="tool-panel relative z-10">
-            <Transition name="sidebar">
-                <div v-if="leftSideVisib" class="tool-panel-inner w-80 overflow-hidden">
-                    <template v-for="(item) in sideNavItems">
-                        <KeepAlive>
-                            <component v-if="settingStore.leftSideActive === item.label" :is="item.component" />
-                        </KeepAlive>
-                    </template>
-                </div>
-            </Transition>
-        </ScrollArea>
+        <Transition name="sidebar">
+            <div v-if="leftSideVisib" class="tool-panel flex flex-col relative z-10 overflow-hidden">
+                <template v-for="(item) in sideNavItems">
+                    <KeepAlive>
+                        <component v-if="settingStore.leftSideActive === item.label" :is="item.component" />
+                    </KeepAlive>
+                </template>
+            </div>
+        </Transition>
         <div class="absolute top-1/2 left-[100%] -translate-y-1/2" @click="leftSideVisib = !leftSideVisib">
             <IconExpend :expended="leftSideVisib" />
         </div>
@@ -44,11 +41,13 @@ function onClickNav(item: any) {
 
 <style lang="scss" scoped>
 .left-side {
+    --tool-panel-width: 320px;
     .tool-bar {
         background-color: var(--sidebar);
     }
-    
+
     .tool-panel {
+        width: var(--tool-panel-width);
         background-color: var(--sidebar-accent);
     }
 

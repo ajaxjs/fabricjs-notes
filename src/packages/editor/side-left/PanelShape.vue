@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Spinner } from "@/components/ui/spinner"
 import { Button } from "@/components/ui/button"
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 import { h, onMounted, shallowRef } from 'vue';
 import { Path, type FabricObject } from 'fabric'
@@ -55,17 +56,17 @@ onMounted(loadData)
 </script>
 
 <template>
-    <div>
+    <ScrollArea class="flex-1 relative h-full">
         <div v-if="loading" class="flex justify-center items-center p-2">
             <Button variant="outline" disabled>
                 <Spinner />
                 Please wait
             </Button>
         </div>
-        <div v-if="pathList" class="grid grid-cols-4 gap-2 px-1 py-3">
+        <div v-if="pathList" class="grid grid-cols-4 gap-2 p-3">
             <ObjectItem v-for="(item, i) in pathList" :key="i" v-bind="item" />
         </div>
-    </div>
+    </ScrollArea>
 </template>
 
 <style lang="scss" scoped></style>

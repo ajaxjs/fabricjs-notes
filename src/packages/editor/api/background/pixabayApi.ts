@@ -46,6 +46,7 @@ export type PixabayResponse = {
     total: number,
     totalHits: number,
     hits: PixabayItem[]
+    per_page: number
 }
 
 const PIXABAY_API_URL = 'http://alifc.afengx.com/proxy/pixabay';
